@@ -1,0 +1,81 @@
+# 1 "C:\\Users\\2074857\\Desktop\\CEGEP-5\\Developpement_de_jeux_video_420-G56-JO\\Note_de_cours\\Test\\main.cpp"
+# 1 "C:\\Users\\2074857\\Desktop\\CEGEP-5\\Developpement_de_jeux_video_420-G56-JO\\Note_de_cours\\Test//"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "C:\\Users\\2074857\\Desktop\\CEGEP-5\\Developpement_de_jeux_video_420-G56-JO\\Note_de_cours\\Test\\main.cpp"
+# 16 "C:\\Users\\2074857\\Desktop\\CEGEP-5\\Developpement_de_jeux_video_420-G56-JO\\Note_de_cours\\Test\\main.cpp"
+class Entier {
+private:
+    int* pEntier;
+
+public:
+    Entier() {
+        pEntier = new int(0);
+    }
+
+    Entier(int entier) {
+        pEntier = new int(entier);
+    }
+
+    Entier(const Entier& entier) {
+        pEntier = new int(*entier.pEntier);
+    }
+
+    ~Entier(){
+
+    }
+};
+
+
+class ClasseBase {
+private:
+    int donneeA;
+
+protected:
+    int donneeB;
+
+public:
+    ClasseBase(int donneeA, int donneeB) {
+        this->donneeA = donneeA;
+        this->donneeB = donneeB;
+    }
+};
+
+class ClasseBonus {
+protected:
+    int donneeD;
+};
+
+class ClasseDerivee : public ClasseBase, public ClasseBonus {
+private:
+    int donneeC;
+protected:
+
+public:
+    ClasseDerivee(int donneeA, int donneeB, int donneeC) : ClasseBase(donneeA, donneeB) {
+        this->donneeC = donneeC;
+    }
+};
+
+
+class Classe {
+private:
+    static int instanceCount;
+
+public:
+    static int getInstanceCount() {
+        return instanceCount;
+    }
+};
+
+int Classe::instanceCount = 0;
+
+int main(int argc, char* argv[]){
+    Classe::getInstanceCount();
+
+    ClasseDerivee classeDerivee(1, 2, 3);
+
+    Entier entier1(42);
+    Entier entier2 = entier1;
+    return 0;
+}
