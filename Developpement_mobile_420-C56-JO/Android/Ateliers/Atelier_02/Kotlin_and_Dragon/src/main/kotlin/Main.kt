@@ -19,11 +19,14 @@ fun main() {
                 character = Cleric()
                 isGood = true
             }
+            else -> {
+                println("This class doesn't exist \n")
+            }
         }
     }
 
 
-    println("Class: " + character!!.javaClass.name + "Health: " + character.health + "/" + character)
+    println("Class: " + character!!.javaClass.name + "   Health: " + character.health + "/" + character.maxHealth)
 }
 
 abstract class Entity {
