@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">The helpful beer choosing app</string>
+
+    <string-array name="beer_type">
+        <item>Blond</item>
+        <item>Brown</item>
+        <item>Black</item>
+        <item>White</item>
+        <item>Amber</item>
+    </string-array>
+
+    <string name="choice">You have chosen the %1$s beer</string>
+    <string name="Choose">Choose</string>
+</resources>

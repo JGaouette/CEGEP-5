@@ -1,0 +1,4 @@
+#Mon Sep 27 23:00:06 EDT 2021
+base.0=/home/drynish/Documents/git/ecole/420-C56 --- Programmation mobile/Android-Kotlin/6.2 - Retrofit/app/build/intermediates/dex/debug/mergeDexDebug/classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
