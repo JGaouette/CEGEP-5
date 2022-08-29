@@ -5,10 +5,10 @@ import (
 	"math/rand"
 )
 
-func main() {
+func __main() {
 	cache := make(map[int]int)
 
-	for i := 0; i <= 100; i++ {
+	for i := 0; i <= 10; i++ {
 		rand := rand.Intn(200)
 		cache[rand] = syracuse(rand)
 	}
