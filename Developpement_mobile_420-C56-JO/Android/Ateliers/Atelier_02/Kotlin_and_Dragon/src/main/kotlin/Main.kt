@@ -33,29 +33,33 @@ fun main() {
 
                 action = readLine()
 
-                when (action) {
-                    "1" -> character.attack(monster)
-                    "2" -> character.special(monster)
-                    "3" -> character.flee(monster)
-                    else -> action = null
-                }
-                println()
-            }
+                if((action != "2") || (action == "2" && character.cooldown == 0)) {
+                    when (action) {
+                        "1" -> character.attack(monster)
+                        "2" -> character.special(monster)
+                        "3" -> character.flee(monster)
+                        else -> action = null
+                    }
 
-            if(monster.health > 0) monster.attack(character)
+                    println()
 
-            if(character.health <= 0 || monster.health <= 0){
-                if(character.health <= 0){
-                    println("You are DEAD! Shame on you and your family")
-                }
-                if(monster.health <= 0){
-                    println("Good job, you have slain the enemy!")
-                }
+                    if(monster.health > 0) monster.attack(character)
 
-                println("Do you want to make an other fight? \"Yes\" to continue, other stuff to be a coward")
-                when (readLine()) {
-                    "Yes" -> character.levelUp()
-                    else-> inFight = false
+                    if(character.health <= 0 || monster.health <= 0){
+                        if(character.health <= 0){
+                            println("You are DEAD! Shame on you and your family")
+                        }
+                        if(monster.health <= 0){
+                            println("Good job, you have slain the enemy!")
+                        }
+
+                        println("Do you want to make an other fight? \"Yes\" to continue, other stuff to be a coward")
+                        when (readLine()) {
+                            "Yes" -> character.levelUp()
+                            else-> inFight = false
+                        }
+                    }
+
                 }
             }
         }
