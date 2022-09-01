@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 )
 
-func __main() {
+//var cache map[int]int = make(map[int]int)
+
+func main() {
 	cache := make(map[int]int)
 
-	for i := 0; i <= 10; i++ {
-		rand := rand.Intn(200)
+	for i := 0; i <= 100; i++ {
+		rand := i
 		cache[rand] = syracuse(rand)
 	}
 
@@ -21,12 +22,11 @@ func syracuse(x int) int {
 
 	for x != 1 {
 		if x%2 == 0 {
-			count += 1
 			x /= 2
 		} else {
-			count += 1
 			x = (x * 3) + 1
 		}
+		count += 1
 	}
 
 	return count

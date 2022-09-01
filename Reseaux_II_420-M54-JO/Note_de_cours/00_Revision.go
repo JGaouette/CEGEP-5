@@ -35,7 +35,7 @@ import (
 	"time"
 )
 
-func main() {
+func _main() {
 	//Switch case
 	time := time.Now()
 	switch {
@@ -79,12 +79,12 @@ func main() {
 	fmt.Println(x)
 }
 
-//Function
+// Function
 func add(x int, y int) int {
 	return x + y
 }
 
-//Function with undefined args number
+// Function with undefined args number
 func addMore(args ...int) int {
 	sum := 0
 	for _, v := range args {
@@ -93,13 +93,13 @@ func addMore(args ...int) int {
 	return sum
 }
 
-//Function that return multiple values
+// Function that return multiple values
 func addAndMultiply(x int, y int) (int, int) {
 	defer fmt.Println("fini") //? S'active à la fin
 	return x + y, x * y
 }
 
-//Recursive function
+// Recursive function
 func fact(x uint) uint {
 	if x == 0 {
 		return 1
@@ -107,7 +107,7 @@ func fact(x uint) uint {
 	return x * fact(x-1)
 }
 
-//Tail recursive (60% better function)
+// Tail recursive (60% better function)
 func factTR(n uint, a uint) uint {
 	if n == 0 {
 		return a

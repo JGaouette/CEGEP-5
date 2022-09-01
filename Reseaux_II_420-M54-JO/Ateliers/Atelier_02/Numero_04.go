@@ -17,4 +17,7 @@ func ____main() {
 			i = 58
 		}
 	}
+
+	fmt.Println(tel)
+
 }
