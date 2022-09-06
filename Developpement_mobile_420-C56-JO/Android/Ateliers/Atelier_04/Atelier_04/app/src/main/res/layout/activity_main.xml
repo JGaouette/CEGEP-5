@@ -18,13 +18,14 @@
             android:text="@string/addition_cost" />
 
         <EditText
-            android:id="@+id/editTextNumberDecimal"
-            android:layout_width="wrap_content"
+            android:id="@+id/ednCost"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
+            android:hint="@string/hint_cost_addition"
             android:inputType="numberDecimal"
-            android:text="0.00$" />
+            android:autofillHints="" />
 
     </LinearLayout>
 
@@ -35,29 +36,47 @@
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="200dp"
+            android:layout_width="74dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/should_add_taxes" />
 
-        <Switch
-            android:id="@+id/switchTaxes"
+        <ToggleButton
+            android:id="@+id/tgbTaxes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:textColor="#455A64"
+            android:textOff="@string/tgb_addTaxes_off"
+            android:textOn="@string/tgb_addTaxes_on" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="151dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/how_much_tip" />
 
         <Spinner
-            android:id="@+id/spinner"
+            android:id="@+id/spnTip"
             android:layout_width="175dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:entries="@array/taxes_array"
+            android:minHeight="48dp"
             android:spinnerMode="dialog" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="horizontal"
         android:visibility="visible">
@@ -70,11 +89,12 @@
             android:text="@string/share_receiving" />
 
         <Spinner
-            android:id="@+id/spinner2"
+            android:id="@+id/spnPerson"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:entries="@array/sharing_person_array" />
+            android:entries="@array/sharing_person_array"
+            android:minHeight="48dp" />
 
     </LinearLayout>
 
@@ -84,16 +104,11 @@
         android:layout_weight="0"
         android:orientation="horizontal">
 
-        <Space
-            android:layout_width="197dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
         <Button
-            android:id="@+id/button"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnCalculate"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:text="@string/submit_button"
             android:visibility="visible" />
 
