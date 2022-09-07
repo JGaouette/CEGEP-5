@@ -1,0 +1,38 @@
+@startuml Class Diagram
+
+abstract class Window {
+    # SDLWindow : SDL_Window
+    + Clear() 
+    + OnRefresh()
+}
+
+class SDLRenderer extends Window {
+    - SDLRenderer : SDLRenderer
+}
+
+class GLContext extends Window{
+    - GLContext : SDL_GLContext
+}
+
+
+class Event {
+    - {static}SDLEvent : SDL_Event
+    + {static}Poll(): int
+    + {static}GetType() : unsigned int
+}
+
+class Application extends Singleton{
+    + AddWindow(Window window*)
+    + RemoveWindow(Window window*)
+    + Start()
+}
+
+class Singleton << (S,orange) Singleton>> {
+    - _instance
+    + GetInstance()
+}
+
+Application "1" *--> "*" Window
+
+
+@enduml
