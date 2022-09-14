@@ -1,0 +1,23 @@
+dim rs as ADODB.Recordset
+set rs = new ADODB.Recordset
+
+dim conn as ADODB.Connection ' Objet de connexion partagé dans le formulaire.
+Set conn = New ADODB.Connection
+    conn.Open "Provider='SQLOLEDB';Data Source='SAUTÉ';Initial Catalog='Films';User Id='Films';Pasword='qwertqwetyqwerty'"
+
+
+// A partir d'une vue
+rs.Open "SELECT FilmCode, FilmTitre FROM VueFilms ORDER BY FilmTitre", conn
+
+// A partir d'une fonction avec paramètre
+rs.Open "SELECT FilmCode, FilmTitre FROM fnFilmsNationalité(2)", conn
+
+// A partir d'une fonction avec paramètre dans un controle visuel
+rs.Open "SELECT * FROM fnFilmsNationalite (" & CStr(lstNationalite.value) &")". conn
+
+// Executer du SQL pur
+conn.Execute "INSERT INTO Distribution (DistCodeFilm, DistCodeActeur, DistRôle) " & "VALUES (" & codeFilm & ", " & codeActeur & ", '" & nomRole & "')"
+
+// Ajouter, Supprimer et Modifier vas dans ue procédure stocké
+conn.Execute "ps_ajoutrole(3, 3, 'Rambo')"
+
