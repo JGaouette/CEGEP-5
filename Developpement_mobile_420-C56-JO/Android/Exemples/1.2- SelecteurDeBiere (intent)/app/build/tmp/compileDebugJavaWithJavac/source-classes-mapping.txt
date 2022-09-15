@@ -1,0 +1,6 @@
+com/example/a1_selecteurdebiere/BuildConfig.java
+ com.example.a1_selecteurdebiere.BuildConfig
+com/example/a1_selecteurdebiere/databinding/ActivityResultBinding.java
+ com.example.a1_selecteurdebiere.databinding.ActivityResultBinding
+com/example/a1_selecteurdebiere/databinding/ActivityMainBinding.java
+ com.example.a1_selecteurdebiere.databinding.ActivityMainBinding

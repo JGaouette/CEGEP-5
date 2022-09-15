@@ -25,7 +25,7 @@
         "-lSDL2main",
         "-lSDL2",
         "-lopengl32",
-        "-lglew32",
+        //"-lglew32",
         "-mwindows"
       ],
       "options": {

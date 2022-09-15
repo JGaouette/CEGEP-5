@@ -1,0 +1,4 @@
+#Tue Sep 06 14:57:43 EDT 2022
+base.0=C\:\\Users\\2074857\\Desktop\\CEGEP-5\\Developpement_mobile_420-C56-JO\\Android\\Exemples\\1.2- SelecteurDeBiere (intent)\\app\\build\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

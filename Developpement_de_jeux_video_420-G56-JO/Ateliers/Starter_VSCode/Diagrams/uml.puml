@@ -6,7 +6,7 @@ abstract class Window {
     + OnRefresh()
 }
 
-class SDLRenderer extends Window {
+class Renderer extends Window {
     - SDLRenderer : SDLRenderer
 }
 
