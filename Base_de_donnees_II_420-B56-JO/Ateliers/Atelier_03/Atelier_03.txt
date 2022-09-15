@@ -1,0 +1,11 @@
+Interface 
+
+Liste Film (vue) -> Click affiche Distribution(fonction tble en ligne) -> Bouton supprimer (proc.del)
+Liste Acteur (vue)
+
+Bouton Ajouter Rôle (proc.ajou) -> Sélectionner Film/Acteur et Textbox Role 
+
+1) Migrer table dans SQL-S
+2) Créer l'iterface dans access
+3) Connexion strings
+4) Coder
