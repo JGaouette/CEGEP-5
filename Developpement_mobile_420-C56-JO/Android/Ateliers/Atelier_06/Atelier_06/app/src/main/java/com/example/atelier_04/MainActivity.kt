@@ -28,12 +28,18 @@ class MainActivity : AppCompatActivity() {
 
             if(hasTaxes) taxes = cost * 0.14975
 
-            var amount = ((cost + taxes) + ((cost + taxes) * tip)) / person
-            val formatted = String.format("%.2f", amount)
+            var total = ((cost + taxes) + ((cost + taxes) * tip))
+            var byPerson = total / person
+            val sByPerson = String.format("%.2f", byPerson)
 
             val intent = Intent(this, ResultActivity::class.java).apply {
-                putExtra("data", "$formatted$")
+                putExtra("brut", "$cost$")
+                putExtra("taxes", "$taxes$")
+                putExtra("total", "$total$")
+                putExtra("person", "$person")
+                putExtra("byPerson", "$sByPerson$")
             }
+
             //Toast.makeText(this, "$formatted$",Toast.LENGTH_LONG).show()
 
             startActivity(intent)

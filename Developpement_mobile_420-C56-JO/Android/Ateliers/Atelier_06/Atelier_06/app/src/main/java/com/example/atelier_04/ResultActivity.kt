@@ -13,9 +13,14 @@ class ResultActivity : AppCompatActivity() {
         setContentView(R.layout.activity_result)
 
         val intent = this.intent
-        val message = intent.getStringExtra("data")
+        val brut = intent.getStringExtra("brut")
+        val taxes = intent.getStringExtra("taxes")
+        val total = intent.getStringExtra("total")
+        val person = intent.getStringExtra("person")
+        val byPerson = intent.getStringExtra("byPerson")
+
 
         val textBox : EditText = findViewById(R.id.edtCost)
-        textBox.setText(message)
+        textBox.setText(byPerson)
     }
 }

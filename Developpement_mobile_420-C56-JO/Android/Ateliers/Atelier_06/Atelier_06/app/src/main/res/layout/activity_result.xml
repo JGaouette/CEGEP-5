@@ -47,4 +47,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="118dp"
+        android:layout_height="59dp"
+        android:layout_marginTop="108dp"
+        android:text="@string/result_btnSave"
+        app:layout_constraintEnd_toStartOf="@+id/btnHistoric"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edtCost" />
+
+    <Button
+        android:id="@+id/btnHistoric"
+        android:layout_width="118dp"
+        android:layout_height="59dp"
+        android:text="@string/result_btnHistoric"
+        app:layout_constraintBaseline_toBaselineOf="@+id/btnSave"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnSave" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

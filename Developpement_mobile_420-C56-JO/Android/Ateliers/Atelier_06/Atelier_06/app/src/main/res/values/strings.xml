@@ -11,6 +11,8 @@
     <string name="result_text">Each person need to pay :</string>
     <string name="main_title">Billing Application</string>
     <string name="result_title">Billing result</string>
+    <string name="result_btnSave">Save</string>
+    <string name="result_btnHistoric">Historic</string>
 
     <string-array name="taxes_array">
         <item>5</item>
