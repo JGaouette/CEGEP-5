@@ -30,13 +30,18 @@ class MainActivity : AppCompatActivity() {
 
             var total = ((cost + taxes) + ((cost + taxes) * tip))
             var byPerson = total / person
+
+            val sCost = String.format("%.2f", cost)
+            val sTaxes = String.format("%.2f", taxes)
+            val sTotal = String.format("%.2f", total)
+            val sPerson = String.format("%.0f", person)
             val sByPerson = String.format("%.2f", byPerson)
 
             val intent = Intent(this, ResultActivity::class.java).apply {
-                putExtra("brut", "$cost$")
-                putExtra("taxes", "$taxes$")
-                putExtra("total", "$total$")
-                putExtra("person", "$person")
+                putExtra("subtotal", "$sCost$")
+                putExtra("taxes", "$sTaxes$")
+                putExtra("total", "$sTotal$")
+                putExtra("person", "$sPerson")
                 putExtra("byPerson", "$sByPerson$")
             }
 

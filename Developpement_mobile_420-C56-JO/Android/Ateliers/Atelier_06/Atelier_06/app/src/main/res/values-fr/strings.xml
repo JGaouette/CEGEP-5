@@ -9,7 +9,11 @@
     <string name="hint_cost_addition">0.00$</string>
     <string name="tgb_addTaxes_off">Sans</string>
     <string name="tgb_addTaxes_on">Avec</string>
-    <string name="result_btnHistoric">Historic</string>
+    <string name="result_btnHistoric">Historique</string>
+    <string name="result_subtotal">Sous-total:</string>
+    <string name="default_price">0.00$</string>
+    <string name="result_taxes">Taxes:</string>
+    <string name="result_total">Total:</string>
 
     <string-array name="taxes_array">
         <item>5</item>
@@ -44,4 +48,10 @@
         <item>11</item>
         <item>12</item>
     </string-array>
+    <string name="main_title">Facture Application</string>
+    <string name="result_title">Facture Résultat</string>
+    <string name="result_btnSave">Sauvegarder</string>
+    <string name="result_text">Coût par personne:</string>
+    <string name="result_byPerson">Par personne (x):</string>
+    <string name="historic_title">Facture Historique</string>
 </resources>
