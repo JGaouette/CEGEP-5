@@ -7,7 +7,7 @@
 /// @class Vector3d
 /// @brief Vecteur à 3 dimensions
 struct Vector3d{
-    double x, y, z;
+    double x, y, z; ///< Position du vecteur
 
     /// @brief Constructeur de vecteur
     /// @param x Position sur l'axe des x
@@ -32,44 +32,44 @@ struct Vector3d{
     }
 
     /// @brief Additionner deux vecteurs
-    /// @param v Vecteur à additionner
+    /// @param vector Vecteur à additionner
     /// @return Vecteur additionné
-    Vector3d operator+(const Vector3d& v){
-        return Vector3d(x + v.x, y + v.y, z + v.z);
+    Vector3d operator+(const Vector3d& vector){
+        return Vector3d(x + vector.x, y + vector.y, z + vector.z);
     }
 
     /// @brief Soustraire deux vecteurs
-    /// @param v Vecteur à soustraire
+    /// @param vector Vecteur à soustraire
     /// @return Vecteur soustrait
-    Vector3d operator-(const Vector3d& v){
-        return Vector3d(x - v.x, y - v.y, z - v.z);
-    }
-
-    /// @brief Produit scalaire
-    /// @param v Vecteur à multiplier
-    /// @return Vecteur multiplié par le vecteur
-    Vector3d operator*(const Vector3d& v){
-        return Vector3d((v.y * z) - (y * v.z), (v.z * x) - (z * v.x), (v.x * y) - (x * v.y));
-    }
-
-    /// @brief Multiplier un vecteur par un scalaire
-    /// @param n Scalaire à multiplier
-    /// @return Vecteur multiplié par le scalaire
-    Vector3d operator*(const double n){
-        return Vector3d(x * n, y * n, z * n);
+    Vector3d operator-(const Vector3d& vector){
+        return Vector3d(x - vector.x, y - vector.y, z - vector.z);
     }
 
     /// @brief Produit vectoriel
-    /// @param v Vecteur à multiplier  
+    /// @param vector Vecteur à multiplier  
     /// @return Le resultat du produit vectoriel
-    double operator%(const Vector3d& v){
-        return x * v.x + y * v.y + z * v.z;
+    Vector3d operator*(const Vector3d& vector){
+        return Vector3d((vector.y * z) - (y * vector.z), (vector.z * x) - (z * vector.x), (vector.x * y) - (x * vector.y));
+    }
+
+    /// @brief Multiplier un vecteur par un scalaire
+    /// @param scale Scalaire à multiplier
+    /// @return Vecteur multiplié par le scalaire
+    Vector3d operator*(const double scale){
+        return Vector3d(x * scale, y * scale, z * scale);
+    }
+
+    /// @brief Produit scalaire
+    /// @param vector Vecteur à multiplier
+    /// @return Vecteur multiplié par le vecteur
+    double operator%(const Vector3d& vector){
+        return x * vector.x + y * vector.y + z * vector.z;
     }
 
     /// @brief Calculer l'angle entre deux vecteurs
-    /// @param v Vecteur à comparer
+    /// @param vector Vecteur à comparer
     /// @return Valeur de l'angle
-    double angleBetween(Vector3d v){
-        return acos(*this % v / (norm() * v.norm()));
+    double angleBetween(Vector3d vector){
+        return acos(*this % vector / (norm() * vector.norm()));
     }
 };
