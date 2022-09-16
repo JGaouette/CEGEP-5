@@ -1,3 +1,7 @@
+/// @file Matrix44.hpp
+/// @brief Création de matrice 44d
+/// @author Jérémy Gaouette (jeremygaouette@gmail.com)
+
 #define e11 elements[0]
 #define e12 elements[1]
 #define e13 elements[2]
@@ -15,21 +19,129 @@
 #define e43 elements[14]
 #define e44 elements[15]
 
-struct Matrix44d{
-    double elements[16];
+#include "Vector3d.hpp"
 
-    Matrix44d loadIdentity(){
+/// @class Matrix44d
+/// @brief Structure permettant de représenter une matrice 4x4
+struct Matrix44d{
+    double elements[16]; ///< Elements de la matrice
+
+    /// @brief Création d'une matrice identité
+    void loadIdentity(){
         e11 = e22 = e33 = e44 = 1.0;
         e12 = e13 = e14 = e21 = e23 = e24 = e31 = e32 = e34 = e41 = e42 = e43 = 0.0;
     }
 
-    Matrix44d loadScale(double x, double y, double z);
+    /// @brief Transposer la matrice
+    void transpose(){
+        double tmp;
+        tmp = e12; e12 = e21; e21 = tmp;
+        tmp = e13; e13 = e31; e31 = tmp;
+        tmp = e14; e14 = e41; e41 = tmp;
+        tmp = e23; e23 = e32; e32 = tmp;
+        tmp = e24; e24 = e42; e42 = tmp;
+        tmp = e34; e34 = e43; e43 = tmp;
+    }
 
-    Matrix44d loadFullRotation(double angle);
+    /// @brief Création d'une matrice à l'échelle
+    /// @param x Mise à l'échelle sur l'axe des x
+    /// @param y Mise à l'échelle sur l'axe des y
+    /// @param z Mise à l'échelle sur l'axe des z
+    void loadScale(double x, double y, double z){
+        loadIdentity();
+        e11 = x;
+        e22 = y;
+        e33 = z;
+    }
 
-    Matrix44d loadXRotation(double angle);
+    /// @brief Création d'une matrice à l'échelle à partir d'un vecteur
+    /// @param scale Vecteur de mise à l'échelle
+    void loadScale(Vector3d scale){
+        loadScale(scale.x, scale.y, scale.z);
+    }
 
-    Matrix44d loadYRotation(double angle);
+    /// @brief Création d'une matrice de rotation complèt
+    /// @param angle Angle de rotation
+    void loadFullRotation(double angle){
+        loadIdentity();
+        e11 = e22 = cos(angle);
+        e12 = sin(angle);
+        e21 = -e12;
+    }
+
+    /// @brief Création d'une matrice de rotation sur l'axe des x
+    /// @param angle Angle de rotation
+    void loadXRotation(double angle){
+        loadIdentity();
+        e22 = cos(angle);
+        e23 = -sin(angle);
+        e32 = sin(angle);
+        e33 = cos(angle);
+    }
+
+    /// @brief Création d'une matrice de rotation sur l'axe des y
+    /// @param angle Angle de rotation
+    void loadYRotation(double angle){
+        loadIdentity();
+        e11 = cos(angle);
+        e13 = sin(angle);
+        e31 = -sin(angle);
+        e33 = cos(angle);
+    }
     
-    Matrix44d loadZRotation(double angle);
+    /// @brief Création d'une matrice de rotation sur l'axe des z
+    /// @param angle Angle de rotation
+    void loadZRotation(double angle){
+        loadIdentity();
+        e11 = cos(angle);
+        e12 = -sin(angle);
+        e21 = sin(angle);
+        e22 = cos(angle);
+    }
+
+    /// @brief Addition de deux matrices
+    /// @param matrix Matrice à additionner
+    /// @return Matrice résultante
+    Matrix44d operator+(Matrix44d matrix){
+        Matrix44d result;
+        for(int i = 0; i < 16; i++){
+            result.elements[i] = elements[i] + matrix.elements[i];
+        }
+        return result;
+    }
+
+    /// @brief Soustraction de deux matrices
+    /// @param matrix Matrice à soustraire
+    /// @return Matrice résultante
+    Matrix44d operator-(Matrix44d matrix){
+        Matrix44d result;
+        for(int i = 0; i < 16; i++){
+            result.elements[i] = elements[i] - matrix.elements[i];
+        }
+        return result;
+    }
+
+    /// @brief Multiplication de deux matrices
+    /// @param matrix Matrice à multiplier
+    /// @return Matrice résultante
+    Matrix44d operator*(const Matrix44d& matrix) const {
+        Matrix44d result;
+        result.e11 = e11 * matrix.e11 + e12 * matrix.e21 + e13 * matrix.e31 + e14 * matrix.e41;
+        result.e12 = e11 * matrix.e12 + e12 * matrix.e22 + e13 * matrix.e32 + e14 * matrix.e42;
+        result.e13 = e11 * matrix.e13 + e12 * matrix.e23 + e13 * matrix.e33 + e14 * matrix.e43;
+        result.e14 = e11 * matrix.e14 + e12 * matrix.e24 + e13 * matrix.e34 + e14 * matrix.e44;
+        result.e21 = e21 * matrix.e11 + e22 * matrix.e21 + e23 * matrix.e31 + e24 * matrix.e41;
+        result.e22 = e21 * matrix.e12 + e22 * matrix.e22 + e23 * matrix.e32 + e24 * matrix.e42;
+        result.e23 = e21 * matrix.e13 + e22 * matrix.e23 + e23 * matrix.e33 + e24 * matrix.e43;
+        result.e24 = e21 * matrix.e14 + e22 * matrix.e24 + e23 * matrix.e34 + e24 * matrix.e44;
+        result.e31 = e31 * matrix.e11 + e32 * matrix.e21 + e33 * matrix.e31 + e34 * matrix.e41;
+        result.e32 = e31 * matrix.e12 + e32 * matrix.e22 + e33 * matrix.e32 + e34 * matrix.e42;
+        result.e33 = e31 * matrix.e13 + e32 * matrix.e23 + e33 * matrix.e33 + e34 * matrix.e43;
+        result.e34 = e31 * matrix.e14 + e32 * matrix.e24 + e33 * matrix.e34 + e34 * matrix.e44;
+        result.e41 = e41 * matrix.e11 + e42 * matrix.e21 + e43 * matrix.e31 + e44 * matrix.e41;
+        result.e42 = e41 * matrix.e12 + e42 * matrix.e22 + e43 * matrix.e32 + e44 * matrix.e42;
+        result.e43 = e41 * matrix.e13 + e42 * matrix.e23 + e43 * matrix.e33 + e44 * matrix.e43;
+        result.e44 = e41 * matrix.e14 + e42 * matrix.e24 + e43 * matrix.e34 + e44 * matrix.e44;
+        return result;
+    }
 };
