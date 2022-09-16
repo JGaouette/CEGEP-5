@@ -8,7 +8,10 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 
+
 class HistoricActivity : AppCompatActivity() {
+    var historic = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding : ActivityHistoricBinding = ActivityHistoricBinding.inflate(layoutInflater)
@@ -17,15 +20,20 @@ class HistoricActivity : AppCompatActivity() {
         val file : File
 
         try {
-            file = File(this.filesDir, "counter.txt")
+            file = File(this.filesDir, "historic.txt")
             val fileInput = FileInputStream(file.path)
             val fileReader = fileInput.bufferedReader()
-            var text = fileReader.readLine()
+            fileReader.useLines {
+                it.map { line ->
+                    var text = binding.textView7.text
+                    binding.textView7.text = "$text \n $line"
+                }
+            }
+            //var text = fileReader.readLine()
 
         }
         catch (e: FileNotFoundException){
             Log.w("test","test")
         }
-
     }
 }

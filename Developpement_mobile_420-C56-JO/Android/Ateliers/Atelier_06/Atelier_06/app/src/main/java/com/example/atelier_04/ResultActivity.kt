@@ -48,7 +48,7 @@ class ResultActivity : AppCompatActivity() {
         }
 
         binding.btnHistoric.setOnClickListener{
-            val intent = Intent(this, ResultActivity::class.java).apply {}
+            val intent = Intent(this, HistoricActivity::class.java).apply {}
             startActivity(intent)
         }
     }
