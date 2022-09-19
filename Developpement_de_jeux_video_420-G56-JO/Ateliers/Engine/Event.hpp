@@ -6,7 +6,7 @@
 #include <SDL2/SDL.h>
 
 /// @class Event
-/// @brief Classe permettaant d'obtenir l'informations d'évènements
+/// @brief Classe permettant d'obtenir l'informations d'évènements
 class Event {
 private:
     static SDL_Event sdlEvent; ///< Conteneur d'informations de l'évènement

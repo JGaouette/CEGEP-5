@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.atelier_04.databinding.ActivityResultBinding
 import java.io.File
 import java.io.FileOutputStream
+import java.io.FileWriter
 import java.io.OutputStreamWriter
 
 class ResultActivity : AppCompatActivity() {
@@ -33,11 +34,18 @@ class ResultActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener{
             try {
                 val file = File(this.filesDir, "historic.csv")
+                /*
                 var fileOutput = FileOutputStream(file)
                 val outputWriter = OutputStreamWriter(fileOutput)
+                */
 
-                outputWriter.append("Subtotal: $subtotal, Taxes: $taxes, Total: $total, By person ($person): $byPerson")
-                outputWriter.close()
+                var fileWriter = FileWriter(file)
+                if (!file.exists())
+                    file.createNewFile()
+
+                fileWriter.append("Subtotal: $subtotal, Taxes: $taxes, Total: $total By person ($person): $byPerson \n")
+                fileWriter.flush()
+                fileWriter.close()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

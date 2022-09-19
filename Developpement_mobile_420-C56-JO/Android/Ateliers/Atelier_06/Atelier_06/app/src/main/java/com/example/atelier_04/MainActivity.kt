@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
             val sCost = String.format("%.2f", cost)
             val sTaxes = String.format("%.2f", taxes)
+            val sTip = String.format("%.2f", tip)
             val sTotal = String.format("%.2f", total)
             val sPerson = String.format("%.0f", person)
             val sByPerson = String.format("%.2f", byPerson)
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ResultActivity::class.java).apply {
                 putExtra("subtotal", "$sCost$")
                 putExtra("taxes", "$sTaxes$")
+                putExtra("tip", "$sTip$")
                 putExtra("total", "$sTotal$")
                 putExtra("person", "$sPerson")
                 putExtra("byPerson", "$sByPerson$")

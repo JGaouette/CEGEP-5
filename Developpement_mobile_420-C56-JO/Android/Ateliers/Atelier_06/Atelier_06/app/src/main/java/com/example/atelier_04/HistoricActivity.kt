@@ -2,16 +2,14 @@ package com.example.atelier_04
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.example.atelier_04.databinding.ActivityHistoricBinding
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileNotFoundException
 
 
 class HistoricActivity : AppCompatActivity() {
-    var historic = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding : ActivityHistoricBinding = ActivityHistoricBinding.inflate(layoutInflater)
@@ -20,16 +18,18 @@ class HistoricActivity : AppCompatActivity() {
         val file : File
 
         try {
-            file = File(this.filesDir, "historic.txt")
-            val fileInput = FileInputStream(file.path)
-            val fileReader = fileInput.bufferedReader()
-            fileReader.useLines {
-                it.map { line ->
-                    var text = binding.textView7.text
-                    binding.textView7.text = "$text \n $line"
-                }
-            }
-            //var text = fileReader.readLine()
+            file = File(this.filesDir, "historic.csv")
+            var lines = file.readLines();
+            val list = lines.toMutableList()
+
+            val adapter: ArrayAdapter<String> = ArrayAdapter(
+                this,
+                android.R.layout.simple_dropdown_item_1line,list
+            )
+
+            // attach the array adapter with list view
+            binding.listviewBillings.adapter = adapter
+            adapter.notifyDataSetChanged()
 
         }
         catch (e: FileNotFoundException){
