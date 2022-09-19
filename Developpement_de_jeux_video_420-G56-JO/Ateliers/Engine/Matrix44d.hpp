@@ -48,10 +48,11 @@ struct Matrix44d{
     /// @param y Mise à l'échelle sur l'axe des y
     /// @param z Mise à l'échelle sur l'axe des z
     void loadScale(double x, double y, double z){
-        loadIdentity();
         e11 = x;
         e22 = y;
         e33 = z;
+        e44 = 1.0;
+        e12 = e13 = e14 = e21 = e23 = e24 = e31 = e32 = e34 = e41 = e42 = e43 = 0.0;
     }
 
     /// @brief Création d'une matrice à l'échelle à partir d'un vecteur
@@ -60,43 +61,76 @@ struct Matrix44d{
         loadScale(scale.x, scale.y, scale.z);
     }
 
-    /// @brief Création d'une matrice de rotation complèt
-    /// @param angle Angle de rotation
-    void loadFullRotation(double angle){
-        loadIdentity();
-        e11 = e22 = cos(angle);
-        e12 = sin(angle);
-        e21 = -e12;
-    }
-
     /// @brief Création d'une matrice de rotation sur l'axe des x
-    /// @param angle Angle de rotation
+    /// @param angle Angle de rotation en radian
     void loadXRotation(double angle){
-        loadIdentity();
         e22 = cos(angle);
         e23 = -sin(angle);
         e32 = sin(angle);
-        e33 = cos(angle);
+        e33 = cos(angle);        
+        e11 = e44 = 1.0;
+        e12 = e13 = e14 = e21 = e24 = e31 = e34 = e41 = e42 = e43 = 0.0;
     }
 
     /// @brief Création d'une matrice de rotation sur l'axe des y
-    /// @param angle Angle de rotation
+    /// @param angle Angle de rotation en radian
     void loadYRotation(double angle){
-        loadIdentity();
         e11 = cos(angle);
         e13 = sin(angle);
         e31 = -sin(angle);
         e33 = cos(angle);
+        e22 = e44 = 1.0;
+        e12 = e14 = e21 = e23 = e24 = e32 = e34 = e41 = e42 = e43 = 0.0;
     }
     
     /// @brief Création d'une matrice de rotation sur l'axe des z
-    /// @param angle Angle de rotation
+    /// @param angle Angle de rotation en radian
     void loadZRotation(double angle){
-        loadIdentity();
         e11 = cos(angle);
         e12 = -sin(angle);
         e21 = sin(angle);
-        e22 = cos(angle);
+        e22 = cos(angle);  
+        e33 = e44 = 1.0;
+        e13 = e14 = e23 = e24 = e31 = e32 = e34 = e41 = e42 = e43 = 0.0;
+    }
+
+    /// @brief Création d'une matrice de rotation sur un axe normalisé
+    /// @param angle Angle de rotation en radian
+    void loadRotationOnNormalizedAxis(double angle, Vector3d axis){
+        double c = cos(angle);
+        double s = sin(angle);
+        double t = 1.0 - c;
+        double x = axis.x;
+        double y = axis.y;
+        double z = axis.z;
+
+        e11 = t * x * x + c;
+        e12 = t * x * y - s * z;
+        e13 = t * x * z + s * y;
+        e14 = 0.0;
+
+        e21 = t * x * y + s * z;
+        e22 = t * y * y + c;
+        e23 = t * y * z - s * x;
+        e24 = 0.0;
+
+        e31 = t * x * z - s * y;
+        e32 = t * y * z + s * x;
+        e33 = t * z * z + c;
+        e34 = 0.0;
+
+        e41 = e42 = e43 = 0.0;
+        e44 = 1.0;
+    }
+
+    /// @brief Création de matrice de rotation sur un axe donné 
+    /// @param angle Angle de rotation en radian
+    /// @param axis Vecteur de l'axe de rotation
+    void loadRotationOnAxis(double angle, Vector3d axis){
+        if(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z == 1)
+            loadRotationOnNormalizedAxis(angle, axis);
+        else
+            loadRotationOnNormalizedAxis(angle, axis.normalized());
     }
 
     /// @brief Addition de deux matrices

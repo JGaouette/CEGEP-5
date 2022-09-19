@@ -42,6 +42,7 @@ func ws(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println("read:", err)
 			break
+
 		}
 		log.Printf("recv: %s", message)
 		err = c.WriteMessage(mt, message)
