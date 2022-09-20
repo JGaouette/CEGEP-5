@@ -2,7 +2,6 @@ package com.example.atelier_04
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.atelier_04.databinding.ActivityMainBinding
 
@@ -22,13 +21,13 @@ class MainActivity : AppCompatActivity() {
             if(binding.ednCost.text.toString() != "")
                 cost = binding.ednCost.text.toString().toDouble()
 
-            var tip = binding.spnTip.selectedItem.toString().toDouble() / 100.0
-            var person = binding.spnPerson.selectedItem.toString().toDouble()
+            val tip = binding.spnTip.selectedItem.toString().toDouble() / 100.0
+            val person = binding.spnPerson.selectedItem.toString().toDouble()
             var taxes = 0.00
 
             if(hasTaxes) taxes = cost * 0.14975
 
-            var amount = ((cost + taxes) + ((cost + taxes) * tip)) / person
+            val amount = ((cost + taxes) + ((cost + taxes) * tip)) / person
             val formatted = String.format("%.2f", amount)
 
             val intent = Intent(this, ResultActivity::class.java).apply {

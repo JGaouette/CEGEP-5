@@ -34,18 +34,16 @@ class ResultActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener{
             try {
                 val file = File(this.filesDir, "historic.csv")
-                /*
-                var fileOutput = FileOutputStream(file)
-                val outputWriter = OutputStreamWriter(fileOutput)
-                */
 
-                var fileWriter = FileWriter(file)
+                var fileOutput = FileOutputStream(file, true)
+                val outputWriter = OutputStreamWriter(fileOutput)
+
                 if (!file.exists())
                     file.createNewFile()
 
-                fileWriter.append("Subtotal: $subtotal, Taxes: $taxes, Total: $total By person ($person): $byPerson \n")
-                fileWriter.flush()
-                fileWriter.close()
+                outputWriter.append("Subtotal: $subtotal, Taxes: $taxes, Total: $total By person ($person): $byPerson \n")
+                outputWriter.flush()
+                outputWriter.close()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

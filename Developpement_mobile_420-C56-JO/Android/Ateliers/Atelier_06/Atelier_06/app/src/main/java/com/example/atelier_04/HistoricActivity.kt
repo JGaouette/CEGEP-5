@@ -19,7 +19,7 @@ class HistoricActivity : AppCompatActivity() {
 
         try {
             file = File(this.filesDir, "historic.csv")
-            var lines = file.readLines();
+            val lines = file.readLines()
             val list = lines.toMutableList()
 
             val adapter: ArrayAdapter<String> = ArrayAdapter(
