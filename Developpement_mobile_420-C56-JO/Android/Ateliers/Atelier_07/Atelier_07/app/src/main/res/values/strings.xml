@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">Atelier_04</string>
+    <string name="addition_cost">What is the cost of the bill?</string>
+    <string name="should_add_taxes">Add taxes to the amount?</string>
+    <string name="share_receiving">How many to split the bill?</string>
+    <string name="submit_button">Calculate</string>
+    <string name="how_much_tip">Amount of tip (%):</string>
+    <string name="hint_cost_addition">0.00$</string>
+    <string name="tgb_addTaxes_off">Without</string>
+    <string name="tgb_addTaxes_on">With</string>
+    <string name="result_text">Each person need to pay :</string>
+    <string name="main_title">Billing Application</string>
+    <string name="result_title">Billing result</string>
+    <string name="result_btnSave">Save</string>
+    <string name="result_btnHistoric">Historic</string>
+    <string name="result_subtotal">Subtotal:</string>
+    <string name="default_price">0.00$</string>
+    <string name="result_taxes">Taxes:</string>
+    <string name="result_total">Total:</string>
+
+    <string-array name="taxes_array">
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="sharing_person_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </string-array>
+    <string name="result_byPerson">By person (x):</string>
+    <string name="historic_title">Billing historic</string>
+</resources>
