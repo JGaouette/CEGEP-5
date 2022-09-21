@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import java.lang.NullPointerException
 
-class BillingViewModel(): ViewModel() {
+class BillingViewModel: ViewModel() {
 
     private val _cost = MutableLiveData<Double>()
     private val _taxes = MutableLiveData<Boolean>()
