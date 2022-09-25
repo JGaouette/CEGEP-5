@@ -14,12 +14,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	/*
-		for _, f := range files {
-			go toThumbnail(f)
-		}
-	*/
 
+	recursiveThumbnail(files)
+	threadsThumbnail(files)
+
+}
+
+func recursiveThumbnail(files []os.DirEntry) {
 	for _, f := range files {
 		if !f.IsDir() {
 			fmt.Println(f.Name())
@@ -44,7 +45,12 @@ func main() {
 			jpeg.Encode(out, m, nil)
 		}
 	}
+}
 
+func threadsThumbnail(files []os.DirEntry) {
+	for _, f := range files {
+		go toThumbnail(f)
+	}
 }
 
 func toThumbnail(entry os.DirEntry) {

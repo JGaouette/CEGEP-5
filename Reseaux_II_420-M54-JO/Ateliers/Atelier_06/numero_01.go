@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func main() {
+func _main() {
 	c := make(chan string)
 
 	for i := 0; i < 10; i++ {
@@ -31,7 +31,7 @@ func printer(c chan string) {
 func primeNumber(n int, c chan string) {
 	rand.Seed(time.Now().UnixNano())
 
-	var isPrime bool = false
+	var isPrime = false
 	var nb int
 
 	for !isPrime {
