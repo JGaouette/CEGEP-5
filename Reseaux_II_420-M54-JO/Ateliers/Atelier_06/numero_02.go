@@ -15,7 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	recursiveThumbnail(files)
+	//recursiveThumbnail(files)
 	threadsThumbnail(files)
 
 }

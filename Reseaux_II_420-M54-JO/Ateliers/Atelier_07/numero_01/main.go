@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -25,14 +26,33 @@ func main() {
 	}
 }
 
-func loadIndex(w http.ResponseWriter, _ *http.Request) {
-	vueRaw, _ := os.ReadFile("./www/views/index.html")
-	vue := string(vueRaw)
+func loadIndex(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
+	switch r.Method {
+	case "GET":
+		w.Header().Set("Content-Type", "text/html")
+		content, _ := os.ReadFile("./www/views/index.html")
+		io.WriteString(w, string(content))
+	case "POST":
+		no1, _ := strconv.Atoi(r.FormValue("no1"))
+		no2, _ := strconv.Atoi(r.FormValue("no2"))
+		var result = no1 + no2
+		var resultCookie = http.Cookie{Name: "result", Value: strconv.Itoa(result)}
+		http.SetCookie(w, &resultCookie)
+		http.Redirect(w, r, "/result", http.StatusTemporaryRedirect)
+	}
 	/*
+
+		vueRaw, _ := os.ReadFile("./www/views/index.html")
+		vue := string(vueRaw)
 		vue = strings.Replace(vue, "{{name}}", "John", 1)
 		w.Header().Set("Content-Type", "text/html")
+		io.WriteString(w, vue)
 	*/
-	io.WriteString(w, vue)
 }
 
 func loadResult(w http.ResponseWriter, _ *http.Request) {

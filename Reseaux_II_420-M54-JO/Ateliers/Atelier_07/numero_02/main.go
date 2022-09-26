@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -17,6 +18,7 @@ func main() {
 	fileServer := http.FileServer(http.Dir("./www/assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
 
+	//Goroutine de w
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Println("ListendAndServe:", err)
@@ -44,17 +46,31 @@ func ws(w http.ResponseWriter, r *http.Request) {
 	}(c)
 
 	for {
-		mt, message, err := c.ReadMessage()
+		total := 0
+		msgType, message, err := c.ReadMessage()
 		if err != nil {
 			log.Println("read:", err)
 			break
 
 		}
-		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			log.Println("write:", err)
+
+		if msgType == websocket.CloseMessage {
+			log.Println("Fermeture du socket")
 			break
 		}
+
+		number, _ := strconv.Atoi(string(message))
+		total += number
+
+		c.WriteMessage(msgType, []byte(strconv.Itoa(total)))
+
+		/*
+			log.Printf("recv: %s", message)
+			err = c.WriteMessage(mt, message)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+		*/
 	}
 }

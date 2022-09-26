@@ -18,6 +18,9 @@ func main() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
+	http.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {
+		os.ReadFile("./www/views/chat/index.html")
+	})
 	http.HandleFunc("/tech/create", func(w http.ResponseWriter, r *http.Request) {
 		os.ReadFile("./www/views/tech/create.php")
 	})
