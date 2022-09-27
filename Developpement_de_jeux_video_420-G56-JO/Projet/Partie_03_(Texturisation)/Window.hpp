@@ -7,7 +7,6 @@
 #include <SDL2/SDL_image.h>
 #include "SDL2/SDL_ttf.h"
 
-
 /// @class Window
 /// @brief Classe représentant une fenêtre du système d'exploitation
 class Window {
@@ -15,6 +14,8 @@ protected:
     SDL_Window* sdlWindow; ///< Fenêtre
 
 public:
+    int width, height; ///< Largeur et hauteur de la fenêtre
+
     /// @brief 
     /// @param title Titre de la fenêtre
     /// @param x  Position sur l'axe des x
@@ -23,6 +24,8 @@ public:
     /// @param height Hauteur
     /// @param flags Indicateurs
     Window(const char* title = "", int x = SDL_WINDOWPOS_CENTERED, int y = SDL_WINDOWPOS_CENTERED, int width = 640, int height = 480, unsigned int flags = 0){
+        this->width = width;
+        this->height = height;
         sdlWindow = SDL_CreateWindow(title, x, y, width, height, flags);
     }
 

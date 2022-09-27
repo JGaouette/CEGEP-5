@@ -7,15 +7,19 @@ class Chrono {
 private:
 public:
     steady_clock::time_point start;
-    steady_clock::time_point stop;
 
     Chrono();
     
     void start(){
-
+        start = steady_clock::now();
     }
 
-    void stop();
-    void reset();
-    double getElapsedTime();
+
+    double delta(){
+        return duration_cast<nanoseconds>(steady_clock::now() - start).count() / 1000000000.0;
+    }
+
+    void reset(){
+        start = steady_clock::now();
+    }
 };

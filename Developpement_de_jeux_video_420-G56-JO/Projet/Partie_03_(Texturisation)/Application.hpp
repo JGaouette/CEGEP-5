@@ -2,10 +2,13 @@
 /// @brief Application
 /// @author Jérémy Gaouette (jeremygaouette@gmail.com)
 
-#include <map>
+#pragma once
 
+#include <map>
 #include "GLContext.hpp"
 #include "Event.hpp"
+#include "texture.hpp"
+
 
 using namespace std;
 
@@ -34,6 +37,8 @@ public:
 
     void start() {
         bool isUp = true;
+        Texture* texture = new Texture("img/shrek.png");
+        Font* font = new Font("font/Norse.ttf", 24);
 
         while(isUp){
 
@@ -51,6 +56,8 @@ public:
 
             glContext.clear();
             glContext.draw(); // Gestion de l'affichage
+            glContext.drawRect(texture, 0, 0, 100, 100);
+            glContext.drawText(font, "Hello World!", {255, 0, 0, 255}, 0, 0);
             glContext.refresh(); 
         }
     }

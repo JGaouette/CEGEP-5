@@ -1,19 +1,18 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#include <string>
 
 #include "Window.hpp"
 #include "Matrix44d.hpp"
-#include <string>
+#include "texture.hpp"
+#include "font.hpp"
 
+using namespace std;
 
 class GLContext : public Window {
 private:
     SDL_GLContext glContext;
     Matrix44d projectionMatrix;
-    TTF_Font* ttfFont;
-
-    unsigned int textureId;
-    int w, h;
 public:
     /// @param title Titre de la fenêtre
     /// @param x  Position sur l'axe des x
@@ -29,69 +28,14 @@ public:
         projectionMatrix.loadOrthographic(width, height);
         TTF_Init();
 
-        ttfFont = TTF_OpenFont("font/varsity_regular.ttf", 24);
+        //ttfFont = TTF_OpenFont("font/varsity_regular.ttf", 24);
 
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glGenTextures(1, &textureId);
-        glBindTexture(GL_TEXTURE_2D, textureId);
-
-        //load font surface
-        // TODO : LE titre est un char[], donc string text
-        size_t fps = 42;
-        string text = "Hello World";
-        text = to_string(fps);
-        SDL_Surface* sdlSurface = TTF_RenderText_Blended(ttfFont, text.c_str(), {255, 0, 0, 255});
-
-        //Patch misalignement (Make a function with that)
-        unsigned int realPitch = sdlSurface->w * sdlSurface->format->BytesPerPixel;
-        unsigned char* srcPointer = (unsigned char*)sdlSurface->pixels;
-        unsigned char* dstPointer = srcPointer;
-        for(size_t i = 0; i < sdlSurface->h; i++){
-            memmove(dstPointer, srcPointer, realPitch);
-            dstPointer += realPitch;
-            srcPointer += sdlSurface->pitch;
-        }
-        sdlSurface->pitch = realPitch;
-        
-        /* Apple
-        #ifdef __APPLE__
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
-                                        0, GL_BGRA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
-        #else
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
-                                        0, GL_RGBA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
-        #endif
-        */
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
-                                    0, GL_BGRA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
-
-        w = sdlSurface->w; h = sdlSurface->h;
-
-        SDL_FreeSurface(sdlSurface);
-
-
-
-        //Load image
-        /*
-        SDL_Surface* sdlSurface = IMG_Load("img/shrek.png");
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h,
-                                    0, GL_RGBA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
-        w = sdlSurface->w; h = sdlSurface->h;
-        SDL_FreeSurface(sdlSurface);
-*/
-
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
     ~GLContext(){
-        TTF_CloseFont(ttfFont);
-        glDeleteTextures(1, &textureId);
         SDL_GL_DeleteContext(glContext);
     }
 
@@ -106,18 +50,54 @@ public:
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+    } 
+
+
+
+
+
+    void drawRect(Texture* texture, int x, int y, int w, int h){
+        glBindTexture(GL_TEXTURE_2D, texture->id);
 
         glBegin(GL_QUADS);
-            glTexCoord2d(0.0, 0.0); glVertex3d(0.0, 0.0, 0.0);
-            glTexCoord2d(1.0, 0.0); glVertex3d((double)w, 0.0, 0.0);
-            glTexCoord2d(1.0, 1.0); glVertex3d((double)w, (double)h, 0.0);
-            glTexCoord2d(0.0, 1.0); glVertex3d(0.0, (double)h, 0.0);
+            glTexCoord2f(0, 0); glVertex2f(x, y);
+            glTexCoord2f(1, 0); glVertex2f(x + w, y);
+            glTexCoord2f(1, 1); glVertex2f(x + w, y + h);
+            glTexCoord2f(0, 1); glVertex2f(x, y + h);
         glEnd();
+    }
 
-        // TODO Compteur de rafraichissement
+    void drawText(Font* font, string text, SDL_Color color, int xPos, int yPos){
+        font->setText(text, color);
+        glBindTexture(GL_TEXTURE_2D, font->id);
 
-        //draw square
+        glBegin(GL_QUADS);
+            glTexCoord2d(0.0, 0.0); glVertex3d((double)(xPos - font->width ), yPos, 0.0);
+            glTexCoord2d(1.0, 0.0); glVertex3d((double)(xPos), yPos, 0.0);
+            glTexCoord2d(1.0, 1.0); glVertex3d((double)(xPos), yPos + (double)font->height, 0.0);
+            glTexCoord2d(0.0, 1.0); glVertex3d((double)(xPos - font->width), yPos + (double)font->height, 0.0);
+        glEnd(); 
+    }
 
+
+
+
+    void drawRect(int xPos, int yPos, int width, int height){
+        glBegin(GL_QUADS);
+            glTexCoord2f(0, 0); glVertex2f(xPos, yPos);
+            glTexCoord2f(1, 0); glVertex2f(xPos + width, yPos);
+            glTexCoord2f(1, 1); glVertex2f(xPos + width, yPos + height);
+            glTexCoord2f(0, 1); glVertex2f(xPos, yPos + height);
+        glEnd();
+    }
+
+    void drawQuad(int topLeftPos, int topRightPos, int bottomRightPos, int bottomLeftPos){
+        glBegin(GL_QUADS);
+            glTexCoord2f(0, 0); glVertex2f(topLeftPos, topRightPos);
+            glTexCoord2f(1, 0); glVertex2f(topRightPos, topRightPos);
+            glTexCoord2f(1, 1); glVertex2f(bottomRightPos, bottomRightPos);
+            glTexCoord2f(0, 1); glVertex2f(bottomLeftPos, bottomLeftPos);
+        glEnd();
     }
 
     void refresh(){
