@@ -19,7 +19,7 @@ func main() {
 	fileServer := http.FileServer(http.Dir("./www/assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
 
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8085", nil)
 	if err != nil {
 		log.Println("ListendAndServe:", err)
 		return

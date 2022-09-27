@@ -1,8 +1,7 @@
 window.onload = function () {
     let conn;
-    const username = document.getElementById("username");
     const msg = document.getElementById("msg");
-    const log = document.getElementById("log");
+    const log = document.getElementById("message-container");
 
     function appendLog(item) {
         const doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
@@ -12,14 +11,27 @@ window.onload = function () {
         }
     }
 
-    document.getElementById("form").onsubmit = function () {
+    document.getElementById("submit").onclick = function () {
         if (!conn) {
             return false;
         }
         if (!msg.value) {
             return false;
         }
-        conn.send(username.value + ": " + msg.value);
+        conn.send(msg.value);
+        msg.value = "";
+        return false;
+
+    };
+
+    document.getElementById("chat").onsubmit = function () {
+        if (!conn) {
+            return false;
+        }
+        if (!msg.value) {
+            return false;
+        }
+        conn.send(msg.value);
         msg.value = "";
         return false;
     };

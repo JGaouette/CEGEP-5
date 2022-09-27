@@ -2,31 +2,26 @@ package main
 
 import (
 	"flag"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
-
-var addr = flag.String("addr", ":8085", "http service address")
 
 func main() {
 	//Init server
+	var addr = flag.String("addr", ":8080", "http service address")
 	flag.Parse()
 	hub := newHub()
 	go hub.run()
-	http.HandleFunc("/", loadIndex)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
-	})
-	http.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {
-		os.ReadFile("./www/views/chat/index.html")
-	})
-	http.HandleFunc("/tech/create", func(w http.ResponseWriter, r *http.Request) {
-		os.ReadFile("./www/views/tech/create.php")
-	})
-	http.HandleFunc("/tech/", func(w http.ResponseWriter, r *http.Request) {
-		os.ReadFile("./www/views/tech/read.php")
-	})
+	http.HandleFunc("/", loadHome)
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) { serveWs(hub, w, r) })
+
+	http.HandleFunc("/client", loadClient)
+	http.HandleFunc("/tech", loadTech)
+	http.HandleFunc("/404", load404)
+	//http.HandleFunc("/home", loadHome)
 
 	//File server
 	fileServer := http.FileServer(http.Dir("./www/assets"))
@@ -39,7 +34,7 @@ func main() {
 	}
 }
 
-func loadIndex(w http.ResponseWriter, r *http.Request) {
+func loadHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
@@ -49,5 +44,64 @@ func loadIndex(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	http.ServeFile(w, r, "./www/views/home/index.html")
+
+	//http.ServeFile(w, r, "./www/views/home/home.html")
+
+	w.Header().Set("Content-Type", "text/html")
+	log.Println(r.URL)
+
+	header, _ := os.ReadFile("./www/views/templates/header.html")
+	headerView := string(header)
+	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Home", 1)
+	headerView = strings.Replace(headerView, "{{H1}}", "Clavardage du C.A.I", 1)
+
+	content, _ := os.ReadFile("./www/views/home/home.html")
+	footer, _ := os.ReadFile("./www/views/templates/footer.html")
+
+	io.WriteString(w, headerView+string(content)+string(footer))
+}
+
+func loadClient(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	log.Println(r.URL)
+
+	header, _ := os.ReadFile("./www/views/templates/header.html")
+	headerView := string(header)
+	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Client", 1)
+	headerView = strings.Replace(headerView, "{{H1}}", "Client", 1)
+
+	content, _ := os.ReadFile("./www/views/home/client.html")
+	footer, _ := os.ReadFile("./www/views/templates/footer.html")
+
+	io.WriteString(w, headerView+string(content)+string(footer))
+}
+
+func loadTech(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	log.Println(r.URL)
+
+	header, _ := os.ReadFile("./www/views/templates/header.html")
+	headerView := string(header)
+	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Tech", 1)
+	headerView = strings.Replace(headerView, "{{H1}}", "Tech", 1)
+
+	content, _ := os.ReadFile("./www/views/home/tech.html")
+	footer, _ := os.ReadFile("./www/views/templates/footer.html")
+
+	io.WriteString(w, headerView+string(content)+string(footer))
+}
+
+func load404(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	log.Println(r.URL)
+
+	header, _ := os.ReadFile("./www/views/templates/header.html")
+	headerView := string(header)
+	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - 404", 1)
+	headerView = strings.Replace(headerView, "{{H1}}", "404", 1)
+
+	content, _ := os.ReadFile("./www/views/home/404.html")
+	footer, _ := os.ReadFile("./www/views/templates/footer.html")
+
+	io.WriteString(w, headerView+string(content)+string(footer))
 }

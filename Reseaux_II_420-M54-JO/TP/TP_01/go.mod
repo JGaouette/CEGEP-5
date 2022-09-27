@@ -1,4 +1,4 @@
-module atelier_07
+module tp_01
 
 go 1.19
 
