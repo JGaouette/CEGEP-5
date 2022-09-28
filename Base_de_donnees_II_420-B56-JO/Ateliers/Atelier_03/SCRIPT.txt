@@ -1,0 +1,37 @@
+CREATE VIEW vueActeurs AS
+SELECT * FROM Acteurs
+
+
+
+CREATE FUNCTION fnDistribution(@FilmCode int) 
+RETURNS TABLE
+AS
+	RETURN SELECT ActCode, FilmCode, ActNom, ActPrénom, DistRôle FROM Acteurs 
+		INNER JOIN Distributions ON Acteurs.ActCode = Distributions.DistCodeActeur
+		INNER JOIN Films ON Distributions.DistCodeFilm = Films.FilmCode
+	WHERE FilmCode = @FilmCode
+
+
+
+CREATE PROC psSupprimerRole
+    	@actCode int, 
+    	@filmCode int,
+    	@role nvarchar(50)
+AS
+BEGIN
+    	DELETE FROM Distributions
+    	WHERE DistCodeActeur = @actCode AND DistCodeFilm = @filmCode AND DistRôle = @role
+    	PRINT('Il y a eu ' + CAST(@@ROWCOUNT AS nvarchar(5)) + ' suppressions!')
+END
+
+
+
+CREATE PROC psAjouterRole
+    	@actCode int,
+	@filmCode int,
+	@role nvarchar(50)
+AS
+BEGIN
+	INSERT INTO Distributions
+    	VALUES (@filmCode, @actCode, @role)
+END
