@@ -38,8 +38,7 @@ public:
         glBindTexture(GL_TEXTURE_2D, id);
 
         //! Si c'est mauvais mettre dans set text
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     }
 
     ~Font(){
@@ -63,6 +62,9 @@ public:
                                     0, GL_BGRA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
          
         SDL_FreeSurface(sdlSurface);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 };
 

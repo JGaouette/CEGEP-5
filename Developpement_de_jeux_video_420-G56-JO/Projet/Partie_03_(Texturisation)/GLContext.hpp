@@ -28,8 +28,6 @@ public:
         projectionMatrix.loadOrthographic(width, height);
         TTF_Init();
 
-        //ttfFont = TTF_OpenFont("font/varsity_regular.ttf", 24);
-
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -52,10 +50,6 @@ public:
         glLoadIdentity();
     } 
 
-
-
-
-
     void drawRect(Texture* texture, int x, int y, int w, int h){
         glBindTexture(GL_TEXTURE_2D, texture->id);
 
@@ -72,32 +66,25 @@ public:
         glBindTexture(GL_TEXTURE_2D, font->id);
 
         glBegin(GL_QUADS);
-            glTexCoord2d(0.0, 0.0); glVertex3d((double)(xPos - font->width ), yPos, 0.0);
-            glTexCoord2d(1.0, 0.0); glVertex3d((double)(xPos), yPos, 0.0);
-            glTexCoord2d(1.0, 1.0); glVertex3d((double)(xPos), yPos + (double)font->height, 0.0);
-            glTexCoord2d(0.0, 1.0); glVertex3d((double)(xPos - font->width), yPos + (double)font->height, 0.0);
+            glTexCoord2d(0.0, 0.0); glVertex3d((double)(xPos), yPos, 0.0);
+            glTexCoord2d(1.0, 0.0); glVertex3d((double)(xPos + font->width), yPos, 0.0);
+            glTexCoord2d(1.0, 1.0); glVertex3d((double)(xPos + font->width), yPos + (double)font->height, 0.0);
+            glTexCoord2d(0.0, 1.0); glVertex3d((double)(xPos), yPos + (double)font->height, 0.0);
         glEnd(); 
     }
 
-
-
-
-    void drawRect(int xPos, int yPos, int width, int height){
-        glBegin(GL_QUADS);
-            glTexCoord2f(0, 0); glVertex2f(xPos, yPos);
-            glTexCoord2f(1, 0); glVertex2f(xPos + width, yPos);
-            glTexCoord2f(1, 1); glVertex2f(xPos + width, yPos + height);
-            glTexCoord2f(0, 1); glVertex2f(xPos, yPos + height);
-        glEnd();
-    }
-
-    void drawQuad(int topLeftPos, int topRightPos, int bottomRightPos, int bottomLeftPos){
+    void drawQuad(Texture* texture, int topLeftPos, int topRightPos, int bottomRightPos, int bottomLeftPos){
+        glBindTexture(GL_TEXTURE_2D, texture->id);
         glBegin(GL_QUADS);
             glTexCoord2f(0, 0); glVertex2f(topLeftPos, topRightPos);
             glTexCoord2f(1, 0); glVertex2f(topRightPos, topRightPos);
             glTexCoord2f(1, 1); glVertex2f(bottomRightPos, bottomRightPos);
             glTexCoord2f(0, 1); glVertex2f(bottomLeftPos, bottomLeftPos);
         glEnd();
+    }
+
+    void drawFPS(Font* font, SDL_Color color){
+
     }
 
     void refresh(){

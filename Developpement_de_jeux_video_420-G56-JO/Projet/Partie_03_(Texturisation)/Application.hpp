@@ -8,7 +8,8 @@
 #include "GLContext.hpp"
 #include "Event.hpp"
 #include "texture.hpp"
-
+#include "font.hpp"
+#include "Chrono.hpp"
 
 using namespace std;
 
@@ -36,9 +37,12 @@ public:
     }
 
     void start() {
+        int fps = 0 ;
         bool isUp = true;
         Texture* texture = new Texture("img/shrek.png");
-        Font* font = new Font("font/Norse.ttf", 24);
+        Font* font = new Font("font/Norse.ttf", 48);
+        Chrono* chrono = new Chrono();
+        chrono->startTimer();
 
         while(isUp){
 
@@ -54,10 +58,12 @@ public:
             
             // Mise à jour de l'affichage
 
+
             glContext.clear();
             glContext.draw(); // Gestion de l'affichage
-            glContext.drawRect(texture, 0, 0, 100, 100);
-            glContext.drawText(font, "Hello World!", {255, 0, 0, 255}, 0, 0);
+            glContext.drawRect(texture, 0, 0, 700, 500);
+            glContext.drawText(font, "Shrek is love!", {255, 0, 0, 255}, 0, 0);
+
             glContext.refresh(); 
         }
     }

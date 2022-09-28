@@ -1,19 +1,19 @@
+#pragma once
+
 #include <chrono>
 
 using namespace std::chrono;
 
-
 class Chrono {
-private:
 public:
     steady_clock::time_point start;
 
     Chrono();
+    ~Chrono();
     
-    void start(){
+    void startTimer(){
         start = steady_clock::now();
     }
-
 
     double delta(){
         return duration_cast<nanoseconds>(steady_clock::now() - start).count() / 1000000000.0;
