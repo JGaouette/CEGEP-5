@@ -1,0 +1,51 @@
+@startuml Diagram
+
+class Dispatcher {
+    -map<string, Observable*>
+
+    + addIncident(name: string)
+    + removeIncident(name: string)
+    + available(incident: string, responder: Observer*)
+    + unavailable(incident: string, responder: Observer*)
+}
+
+Dispatcher "1" *-- "*" Observable
+
+'note top of Observable : Interventions
+Class Observable {
+    - observers : List<Observer>
+
+    + subscribe(observer: Observer* )
+    + unsubscribe(observer: Observer* )
+    + notify(data: T)
+}
+
+Observer "*" --o "1" Observable
+
+'note top of Observer : Intervenants
+abstract class Observer {
+    + {abstract}notification(data: T) 
+}
+
+class Policeman {
+    + name : string
+}
+
+class Firefighter {
+    + name : string
+}
+
+class Paramedic {
+    + name : string
+}
+
+Policeman --|> Observer
+Firefighter --|> Observer
+Paramedic --|> Observer
+
+
+
+
+
+@enduml
+

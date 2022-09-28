@@ -36,9 +36,6 @@ public:
 
         glGenTextures(1, &id);
         glBindTexture(GL_TEXTURE_2D, id);
-
-        //! Si c'est mauvais mettre dans set text
-
     }
 
     ~Font(){

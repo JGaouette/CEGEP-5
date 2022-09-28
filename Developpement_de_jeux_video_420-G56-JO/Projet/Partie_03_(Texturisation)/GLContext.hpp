@@ -62,7 +62,7 @@ public:
     }
 
     void drawText(Font* font, string text, SDL_Color color, int xPos, int yPos){
-        font->setText(text, color);
+
         glBindTexture(GL_TEXTURE_2D, font->id);
 
         glBegin(GL_QUADS);
