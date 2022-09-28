@@ -8,8 +8,9 @@ class Chrono {
 public:
     steady_clock::time_point start;
 
-    Chrono();
-    ~Chrono();
+    Chrono(){};
+
+    ~Chrono(){};
     
     void startTimer(){
         start = steady_clock::now();

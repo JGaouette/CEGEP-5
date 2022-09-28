@@ -38,6 +38,7 @@ public:
 
     void start() {
         int fps = 0 ;
+        int actualFps = 0 ;
         bool isUp = true;
         Texture* texture = new Texture("img/shrek.png");
         Font* font = new Font("font/Norse.ttf", 48);
@@ -63,8 +64,17 @@ public:
             glContext.draw(); // Gestion de l'affichage
             glContext.drawRect(texture, 0, 0, 700, 500);
             glContext.drawText(font, "Shrek is love!", {255, 0, 0, 255}, 0, 0);
+            
+            if(chrono->delta() >= 1){
+                chrono->reset();
+                actualFps = fps;
+                fps = 0;
+            }
+
+            glContext.drawFPS(font, to_string(actualFps) , {255, 0, 0, 255});
 
             glContext.refresh(); 
+            fps++;
         }
     }
 };

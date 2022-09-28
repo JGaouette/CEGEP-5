@@ -83,8 +83,16 @@ public:
         glEnd();
     }
 
-    void drawFPS(Font* font, SDL_Color color){
+    void drawFPS(Font* font, string fps, SDL_Color color){
+        font->setText(fps, color);
+        glBindTexture(GL_TEXTURE_2D, font->id);
 
+        glBegin(GL_QUADS);
+            glTexCoord2d(0.0, 0.0); glVertex3d(width - font->width, 0.0, 0.0);
+            glTexCoord2d(1.0, 0.0); glVertex3d(width, 0.0, 0.0);
+            glTexCoord2d(1.0, 1.0); glVertex3d(width, font->height, 0.0);
+            glTexCoord2d(0.0, 1.0); glVertex3d(width - font->width, font->height, 0.0);
+        glEnd(); 
     }
 
     void refresh(){
