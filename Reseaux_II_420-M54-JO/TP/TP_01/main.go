@@ -10,6 +10,10 @@ import (
 )
 
 func main() {
+	if !techExists("admin") {
+		createTech("admin", "admin", true)
+	}
+
 	//Init server
 	var addr = flag.String("addr", ":8080", "http service address")
 	flag.Parse()
@@ -32,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+
 }
 
 func loadHome(w http.ResponseWriter, r *http.Request) {
@@ -40,13 +45,23 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
+	/*
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+	*/
+	switch r.Method {
+	case "GET":
+
+	case "POST":
+		r.ParseForm()
+		username := r.Form.Get("username")
+		password := r.Form.Get("password")
+
+		log.Println(techLogin(username, password))
 	}
-
-	//http.ServeFile(w, r, "./www/views/home/home.html")
-
+	
 	w.Header().Set("Content-Type", "text/html")
 	log.Println(r.URL)
 
@@ -59,6 +74,9 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
 
 	io.WriteString(w, headerView+string(content)+string(footer))
+
+	//http.ServeFile(w, r, "./www/views/home/home.html")
+
 }
 
 func loadClient(w http.ResponseWriter, r *http.Request) {
