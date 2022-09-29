@@ -26,7 +26,7 @@ func createTech(username string, password string, isAdmin bool) bool {
 	}
 
 	statement, _ := getDatabase().Prepare("INSERT INTO Techs (tech_username, tech_password, tech_admin) VALUES (?, ?, ?)")
-	_, err := statement.Exec(username, any(hashPassword(password)), admin)
+	_, err := statement.Exec(username, any(hash(password)), admin)
 	if err != nil {
 		log.Fatal(err)
 		return false
@@ -34,19 +34,37 @@ func createTech(username string, password string, isAdmin bool) bool {
 	return true
 }
 
-func techLogin(username string, password string) bool {
+func createToken(username string) string {
+	token := hash(username)
+
+	statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_token = ? WHERE tech_username = ?")
+	_, err := statement.Exec(token, username)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	return token
+}
+
+func techLogin(username string, password string) int {
 	var passwordEncrypted string
 
 	err := getDatabase().QueryRow("SELECT tech_password FROM Techs WHERE tech_username = ?;", username).Scan(&passwordEncrypted)
-
 	if err != nil {
-		return false
+		log.Println(err)
+		return 0
 	}
 
-	if !checkPasswordHash(password, passwordEncrypted) {
-		return false
+	if !checkHash(password, passwordEncrypted) {
+		return 0
 	}
-	return true
+
+	var isAdmin int
+	getDatabase().QueryRow("SELECT tech_admin FROM Techs WHERE tech_username = ?;", username).Scan(&isAdmin)
+	if isAdmin == 0 {
+		return 1
+	}
+	return 2
 }
 
 func techExists(username string) bool {
@@ -63,12 +81,27 @@ func techExists(username string) bool {
 	return true
 }
 
-func hashPassword(password string) string {
+func isConnectedAndAdmin(token string) (bool, bool) {
+	var isAdmin int
+
+	err := getDatabase().QueryRow("SELECT tech_admin FROM Techs WHERE tech_token = ?;", token).Scan(&isAdmin)
+	if err != nil {
+		log.Println(err)
+		return false, false
+	}
+
+	if isAdmin == 0 {
+		return true, false
+	}
+	return true, true
+}
+
+func hash(password string) string {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes)
 }
 
-func checkPasswordHash(password, hash string) bool {
+func checkHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

@@ -13,6 +13,9 @@ func main() {
 	if !techExists("admin") {
 		createTech("admin", "admin", true)
 	}
+	if !techExists("tech") {
+		createTech("tech", "tech", false)
+	}
 
 	//Init server
 	var addr = flag.String("addr", ":8080", "http service address")
@@ -25,7 +28,8 @@ func main() {
 	http.HandleFunc("/client", loadClient)
 	http.HandleFunc("/tech", loadTech)
 	http.HandleFunc("/404", load404)
-	//http.HandleFunc("/home", loadHome)
+
+	http.HandleFunc("/admin", loadAdmin)
 
 	//File server
 	fileServer := http.FileServer(http.Dir("./www/assets"))
@@ -45,28 +49,42 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
-	/*
-		if r.Method != http.MethodGet {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-	*/
-	switch r.Method {
-	case "GET":
 
-	case "POST":
-		r.ParseForm()
-		username := r.Form.Get("username")
-		password := r.Form.Get("password")
-
-		log.Println(techLogin(username, password))
-	}
-	
 	w.Header().Set("Content-Type", "text/html")
 	log.Println(r.URL)
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
 	headerView := string(header)
+
+	switch r.Method {
+	case "GET":
+		headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "none", 1)
+		headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)
+	case "POST":
+		r.ParseForm()
+		username := r.Form.Get("username")
+		password := r.Form.Get("password")
+
+		if techLogin(username, password) == 0 {
+			headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
+			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
+		} else {
+			token := createToken(username)
+			var sessionCookie = http.Cookie{Name: "token", Value: token, HttpOnly: true}
+			http.SetCookie(w, &sessionCookie)
+
+			if techLogin(username, password) == 1 {
+				http.Redirect(w, r, "/tech", http.StatusTemporaryRedirect)
+				return
+			} else {
+				http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
+				return
+			}
+		}
+
+		log.Println(techLogin(username, password))
+	}
+
 	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Home", 1)
 	headerView = strings.Replace(headerView, "{{H1}}", "Clavardage du C.A.I", 1)
 
@@ -79,6 +97,62 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func loadAdmin(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := r.Cookie("token")
+	log.Println(cookie)
+	isConnected, isAdmin := isConnectedAndAdmin(cookie.Value)
+
+	log.Println(isConnected)
+	log.Println(isAdmin)
+
+	if !isConnected || !isAdmin {
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	log.Println(r.URL)
+
+	header, _ := os.ReadFile("./www/views/templates/header.html")
+	headerView := string(header)
+	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Admin", 1)
+	headerView = strings.Replace(headerView, "{{H1}}", "Admin", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
+
+	content, _ := os.ReadFile("./www/views/admin/admin.html")
+	footer, _ := os.ReadFile("./www/views/templates/footer.html")
+
+	io.WriteString(w, headerView+string(content)+string(footer))
+}
+
+func loadTech(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := r.Cookie("token")
+	isConnected, isAdmin := isConnectedAndAdmin(cookie.Value)
+
+	log.Println(isConnected)
+	log.Println(isAdmin)
+
+	if !isConnected || isAdmin {
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	log.Println(r.URL)
+
+	header, _ := os.ReadFile("./www/views/templates/header.html")
+	headerView := string(header)
+	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Tech", 1)
+	headerView = strings.Replace(headerView, "{{H1}}", "Tech", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
+
+	content, _ := os.ReadFile("./www/views/home/tech.html")
+	footer, _ := os.ReadFile("./www/views/templates/footer.html")
+
+	io.WriteString(w, headerView+string(content)+string(footer))
+}
+
 func loadClient(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	log.Println(r.URL)
@@ -89,21 +163,6 @@ func loadClient(w http.ResponseWriter, r *http.Request) {
 	headerView = strings.Replace(headerView, "{{H1}}", "Client", 1)
 
 	content, _ := os.ReadFile("./www/views/home/client.html")
-	footer, _ := os.ReadFile("./www/views/templates/footer.html")
-
-	io.WriteString(w, headerView+string(content)+string(footer))
-}
-
-func loadTech(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	log.Println(r.URL)
-
-	header, _ := os.ReadFile("./www/views/templates/header.html")
-	headerView := string(header)
-	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Tech", 1)
-	headerView = strings.Replace(headerView, "{{H1}}", "Tech", 1)
-
-	content, _ := os.ReadFile("./www/views/home/tech.html")
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
 
 	io.WriteString(w, headerView+string(content)+string(footer))

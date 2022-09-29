@@ -1,0 +1,75 @@
+<!--
+
+<?php
+$query = $bd->prepare("SELECT jeux.id, jeux.nom, categories.nom AS categorie FROM `jeux` INNER JOIN categories WHERE jeux.categorie_id = categories.id;");
+$query->execute();
+$gameList = $query->fetchAll(PDO::FETCH_OBJ);
+
+echo '<ul class="list-group">';
+    foreach ($gameList as &$game) { ;?>
+    <li class="list-group-item d-flex">
+        <span class="flex-grow-1 my-auto"><?=$game->nom?><span class="text-muted"> - <?=$game->categorie?></span></span>
+
+        <button type="button" class="btn btn-primary mx-1 rounded-0 rounded-start" onclick="location.href = 'update.php?id=<?=$game->id ?>'">
+            <i class="bi-pencil"></i>
+        </button>
+        <button type="button" class="btn btn-danger mx-1 rounded-0 rounded-end" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-whatever='<?=json_encode($game)?>'>
+            <i class="bi-trash"></i>
+        </button>
+    </li> <?php
+    }
+    echo '</ul>';
+
+    ?>
+-->
+
+    <ul class="list-group container">
+        <li class="list-group-item d-flex">
+            <span class="flex-grow-1 my-auto">Admin<span class="text-muted"> - Admin </span></span>
+
+            <button type="button" class="btn btn-primary mx-1 rounded-1 " onclick="">
+                <i class="bi-pencil"></i>
+            </button>
+            <button type="button" class="btn btn-danger mx-1 rounded-1" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-whatever="">
+                <i class="bi-trash"></i>
+            </button>
+        </li>
+    </ul>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Attention</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" onclick="toDelete()" name="supprimer" class="btn btn-danger">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var gameData
+
+        var modal = document.getElementById('deleteModal')
+        modal.addEventListener('show.bs.modal', function(event) {
+            var button = event.relatedTarget
+            gameData = JSON.parse(button.getAttribute('data-bs-whatever'))
+            console.log(gameData)
+            var modalText = modal.querySelector('.modal-text')
+
+            modalText.textContent = 'Voulez-vous vraiment supprimer ' + gameData.nom + '?'
+
+        })
+
+        function toDelete(){
+            window.location.href="read.php?gameName=" + gameData.nom
+        }
+
+    </script>
