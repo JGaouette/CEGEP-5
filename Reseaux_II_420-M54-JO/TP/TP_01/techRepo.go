@@ -74,6 +74,16 @@ func createTech(username string, password string, isAdmin bool) bool {
 	return true
 }
 
+func deleteTech(id int) bool {
+	statement, _ := getDatabase().Prepare("DELETE FROM Techs WHERE tech_id = ?")
+	_, err := statement.Exec(id)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
 func createToken(username string) string {
 	token := hash(username)
 

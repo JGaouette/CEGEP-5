@@ -6,16 +6,6 @@
 </div>
 
 <ul class="list-group container">
-    <li class="list-group-item d-flex">
-        <span class="flex-grow-1 my-auto">Hard coder comme on dit</span>
-
-        <button type="button" class="btn btn-primary mx-1 rounded-1 " onclick="">
-            <i class="bi-pencil"></i>
-        </button>
-        <button type="button" class="btn btn-danger mx-1 rounded-1" data-bs-toggle="modal" data-bs-target="#deleteModal" data-bs-whatever="">
-            <i class="bi-trash"></i>
-        </button>
-    </li>
     {{TECHS}}
 </ul>
 
@@ -27,7 +17,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p class="modal-text"></p>
+                <p class="modal-text">Êtes vous sur de vouloir supprimer ce technicien du CAI ? Dans le cas échéant vous devrez lui donné 100%</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -37,22 +27,4 @@
     </div>
 </div>
 
-<script>
-    var gameData
-
-    var modal = document.getElementById('deleteModal')
-    modal.addEventListener('show.bs.modal', function(event) {
-        var button = event.relatedTarget
-        gameData = JSON.parse(button.getAttribute('data-bs-whatever'))
-        console.log(gameData)
-        var modalText = modal.querySelector('.modal-text')
-
-        modalText.textContent = 'Voulez-vous vraiment supprimer ' + gameData.nom + '?'
-
-    })
-
-    function toDelete(){
-        window.location.href="read.php?gameName=" + gameData.nom
-    }
-
-</script>
+<script src="../../assets/js/deleteModal.js"></script>

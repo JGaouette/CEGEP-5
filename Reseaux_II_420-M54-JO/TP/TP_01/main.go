@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/gorilla/websocket"
 	"io"
 	"log"
 	"net/http"
@@ -24,7 +25,9 @@ func main() {
 	hub := newHub()
 	go hub.run()
 	http.HandleFunc("/", loadHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) { serveWs(hub, w, r) })
+	http.HandleFunc("/ws", loadWebsocket)
+
+	//http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) { serveWs(hub, w, r) })
 
 	http.HandleFunc("/client", loadClient)
 	http.HandleFunc("/tech", loadTech)
@@ -33,6 +36,7 @@ func main() {
 	http.HandleFunc("/admin", loadAdmin)
 	http.HandleFunc("/admin/create", loadCreate)
 	http.HandleFunc("/admin/edit", loadEdit)
+	http.HandleFunc("/admin/delete", loadDelete)
 
 	//File server
 	fileServer := http.FileServer(http.Dir("./www/assets"))
@@ -46,6 +50,37 @@ func main() {
 
 }
 
+func loadWebsocket(w http.ResponseWriter, r *http.Request) {
+	var upgrader = websocket.Upgrader{} // use default options
+
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	defer c.Close()
+
+	err = c.WriteMessage(websocket.TextMessage, []byte("Hello, client"))
+	if err != nil {
+		log.Println("write:", err)
+	}
+	/*
+		for {
+			mt, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("read:", err)
+				break
+			}
+			log.Printf("recv: %s", message)
+			err = c.WriteMessage(mt, message)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+	*/
+}
+
 func loadHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
 	if r.URL.Path != "/" {
@@ -53,6 +88,10 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	/*
+		var sessionCookie = http.Cookie{Name: "token", Value: "nothing", HttpOnly: true}
+		http.SetCookie(w, &sessionCookie)
+	*/
 	w.Header().Set("Content-Type", "text/html")
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
@@ -72,7 +111,7 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
 		} else {
 			token := createToken(username)
-			var sessionCookie = http.Cookie{Name: "token", Value: token, HttpOnly: true}
+			sessionCookie = http.Cookie{Name: "token", Value: token, HttpOnly: true}
 			http.SetCookie(w, &sessionCookie)
 
 			if techLogin(username, password) == 1 {
@@ -117,14 +156,13 @@ func loadAdmin(w http.ResponseWriter, r *http.Request) {
 
 	techIds := getAllTechIds()
 
-	//get all techs and add them to the table
 	tech := ""
 	allTechView := ""
 	for _, techId := range techIds {
 		tech = getTechUsername(techId)
 		techItem, _ := os.ReadFile("./www/views/templates/techItem.html")
 		techItemView := string(techItem)
-		techItemView = strings.Replace(techItemView, "{{TECH_ID}}", strconv.Itoa(techId), 1)
+		techItemView = strings.Replace(techItemView, "{{TECH_ID}}", strconv.Itoa(techId), 2)
 		techItemView = strings.Replace(techItemView, "{{TECH_USERNAME}}", tech, 1)
 		allTechView += techItemView
 	}
@@ -157,17 +195,23 @@ func loadCreate(w http.ResponseWriter, r *http.Request) {
 		password1 := r.Form.Get("password1")
 		password2 := r.Form.Get("password2")
 
-		if password1 != password2 {
+		if username == "" || password1 == "" || password2 == "" {
 			headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
-			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Les mots de passes ne sont pas identique, veuillez réessayer", 1)
+			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Veuillez remplir tous les champs.", 1)
+
 		} else {
-			if techExists(username) {
+			if password1 != password2 {
 				headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
-				headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Ce technicien exist déjà, veuillez réessayer", 1)
+				headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Les mots de passes ne sont pas identique, veuillez réessayer", 1)
 			} else {
-				createTech(username, password1, false)
-				http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
-				return
+				if techExists(username) {
+					headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
+					headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Ce technicien exist déjà, veuillez réessayer", 1)
+				} else {
+					createTech(username, password1, false)
+					http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
+					return
+				}
 			}
 		}
 	}
@@ -202,9 +246,27 @@ func loadEdit(w http.ResponseWriter, r *http.Request) {
 		headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)
 
 		queryId := r.URL.Query().Get("techId")
+
+		if queryId == "" {
+			log.Println("No techId provided")
+			http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+			return
+		}
+
 		techId, _ = strconv.Atoi(queryId)
 		techUsername = getTechUsername(techId)
-		contentView = strings.Replace(contentView, "{{TECH_USERNAME}}", techUsername, 1)
+
+		if techId == 1 {
+			log.Println("You do not have the permission to edit this user")
+			http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+			return
+		}
+
+		if techUsername == "" {
+			log.Println("No user with this id exists")
+			http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+			return
+		}
 
 	case "POST":
 		r.ParseForm()
@@ -212,24 +274,62 @@ func loadEdit(w http.ResponseWriter, r *http.Request) {
 		password1 := r.Form.Get("password1")
 		password2 := r.Form.Get("password2")
 
-		if password1 != password2 {
+		if username == "" || password1 == "" || password2 == "" {
 			headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
-			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Les mots de passes ne sont pas identique, veuillez réessayer", 1)
+			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Veuillez remplir tous les champs.", 1)
 		} else {
-			if username != techUsername && techExists(username) {
+			if password1 != password2 {
 				headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
-				headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Ce technicien exist déjà, veuillez réessayer", 1)
+				headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Les mots de passes ne sont pas identique, veuillez réessayer", 1)
 			} else {
-				updateTech(techId, username, password1)
-				http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
-				return
+				if username != techUsername && techExists(username) {
+					headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
+					headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Ce technicien exist déjà, veuillez réessayer", 1)
+				} else {
+					updateTech(techId, username, password1)
+					http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
+					return
+				}
 			}
 		}
 	}
 
+	contentView = strings.Replace(contentView, "{{TECH_USERNAME}}", techUsername, 1)
+
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
 
 	io.WriteString(w, headerView+contentView+string(footer))
+}
+
+func loadDelete(w http.ResponseWriter, r *http.Request) {
+	redirect(w, r, true)
+
+	queryId := r.URL.Query().Get("techId")
+
+	if queryId == "" {
+		log.Println("No techId provided")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	techId, _ := strconv.Atoi(queryId)
+	techUsername := getTechUsername(techId)
+
+	if techId == 1 {
+		log.Println("You do not have the permission to delete this user")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	if techUsername == "" {
+		log.Println("No user with this id exists")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	deleteTech(techId)
+
+	http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
 }
 
 func loadTech(w http.ResponseWriter, r *http.Request) {
@@ -292,8 +392,14 @@ func redirect(w http.ResponseWriter, r *http.Request, needAdmin bool) {
 		return
 	}
 
+	if !needAdmin && isAdmin {
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
 	if needAdmin && !isAdmin {
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
+
 }
