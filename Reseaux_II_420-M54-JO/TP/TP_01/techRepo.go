@@ -15,6 +15,46 @@ func getDatabase() *sql.DB {
 	return database
 }
 
+func getAllTechIds() []int {
+	rows, err := getDatabase().Query("SELECT tech_id FROM Techs WHERE tech_admin = 0;")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var ids []int
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+func getTechUsername(id int) string {
+	var username string
+
+	err := getDatabase().QueryRow("SELECT tech_username FROM Techs WHERE tech_id = ?;", id).Scan(&username)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return username
+}
+
+func updateTech(id int, username string, password string) bool {
+	statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_username = ?, tech_password = ? WHERE tech_id = ?")
+	_, err := statement.Exec(username, any(hash(password)), id)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
 func createTech(username string, password string, isAdmin bool) bool {
 	if techExists(username) {
 		return false
