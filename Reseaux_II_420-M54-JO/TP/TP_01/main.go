@@ -22,8 +22,10 @@ func main() {
 	//Init server
 	var addr = flag.String("addr", ":8080", "http service address")
 	flag.Parse()
-	hub := newHub()
-	go hub.run()
+	/*
+		hub := later.newHub()
+		go hub.run()
+	*/
 	http.HandleFunc("/", loadHome)
 	http.HandleFunc("/ws", loadWebsocket)
 
@@ -52,27 +54,46 @@ func main() {
 
 func loadWebsocket(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{} // use default options
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
-	c, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
-	defer c.Close()
+	//defer conn.Close()
 
-	err = c.WriteMessage(websocket.TextMessage, []byte("Hello, client"))
+	cookie, err := r.Cookie("token")
+	log.Println(r.Cookies())
 	if err != nil {
-		log.Println("write:", err)
+		log.Println("No token provided")
+		return
 	}
+	isConnected, _ := isConnectedAndAdmin(cookie.Value)
+
+	conn.WriteMessage(websocket.TextMessage, []byte("true"))
+
+	if isConnected {
+		err = conn.WriteMessage(websocket.TextMessage, []byte("true"))
+		if err != nil {
+			log.Println("write:", err)
+		}
+	} else {
+		err = conn.WriteMessage(websocket.TextMessage, []byte("false"))
+		if err != nil {
+			log.Println("write:", err)
+		}
+	}
+
 	/*
 		for {
-			mt, message, err := c.ReadMessage()
+			mt, message, err := conn.ReadMessage()
 			if err != nil {
 				log.Println("read:", err)
 				break
 			}
 			log.Printf("recv: %s", message)
-			err = c.WriteMessage(mt, message)
+			err = conn.WriteMessage(mt, message)
 			if err != nil {
 				log.Println("write:", err)
 				break
@@ -88,10 +109,6 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*
-		var sessionCookie = http.Cookie{Name: "token", Value: "nothing", HttpOnly: true}
-		http.SetCookie(w, &sessionCookie)
-	*/
 	w.Header().Set("Content-Type", "text/html")
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
@@ -111,7 +128,7 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
 		} else {
 			token := createToken(username)
-			sessionCookie = http.Cookie{Name: "token", Value: token, HttpOnly: true}
+			var sessionCookie = http.Cookie{Name: "token", Value: token, HttpOnly: true}
 			http.SetCookie(w, &sessionCookie)
 
 			if techLogin(username, password) == 1 {
