@@ -40,6 +40,8 @@ func main() {
 	http.HandleFunc("/admin/edit", loadEdit)
 	http.HandleFunc("/admin/delete", loadDelete)
 
+	http.HandleFunc("/logout", loadLogout)
+
 	//File server
 	fileServer := http.FileServer(http.Dir("./www/assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
@@ -49,7 +51,6 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
-
 }
 
 func loadWebsocket(w http.ResponseWriter, r *http.Request) {
@@ -61,45 +62,30 @@ func loadWebsocket(w http.ResponseWriter, r *http.Request) {
 		log.Print("upgrade:", err)
 		return
 	}
-	//defer conn.Close()
+	defer conn.Close()
 
-	cookie, err := r.Cookie("token")
+	var isConnected bool
+
+	cookie, err := r.Cookie("techToken")
 	log.Println(r.Cookies())
 	if err != nil {
-		log.Println("No token provided")
-		return
+		log.Println("No tech logged in")
+		isConnected = false
+	} else {
+		isConnected, _ = isConnectedAndAdmin(cookie.Value)
 	}
-	isConnected, _ := isConnectedAndAdmin(cookie.Value)
-
-	conn.WriteMessage(websocket.TextMessage, []byte("true"))
 
 	if isConnected {
-		err = conn.WriteMessage(websocket.TextMessage, []byte("true"))
+		err = conn.WriteMessage(websocket.TextMessage, []byte("online"))
 		if err != nil {
 			log.Println("write:", err)
 		}
 	} else {
-		err = conn.WriteMessage(websocket.TextMessage, []byte("false"))
+		err = conn.WriteMessage(websocket.TextMessage, []byte("offline"))
 		if err != nil {
 			log.Println("write:", err)
 		}
 	}
-
-	/*
-		for {
-			mt, message, err := conn.ReadMessage()
-			if err != nil {
-				log.Println("read:", err)
-				break
-			}
-			log.Printf("recv: %s", message)
-			err = conn.WriteMessage(mt, message)
-			if err != nil {
-				log.Println("write:", err)
-				break
-			}
-		}
-	*/
 }
 
 func loadHome(w http.ResponseWriter, r *http.Request) {
@@ -113,6 +99,7 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
 	headerView := string(header)
+	headerView = headerDisconnect(r, headerView)
 
 	switch r.Method {
 	case "GET":
@@ -128,16 +115,25 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
 		} else {
 			token := createToken(username)
-			var sessionCookie = http.Cookie{Name: "token", Value: token, HttpOnly: true}
-			http.SetCookie(w, &sessionCookie)
+			var sessionCookie http.Cookie
 
 			if techLogin(username, password) == 1 {
+				sessionCookie = http.Cookie{Name: "adminToken", Value: "", HttpOnly: true, MaxAge: -1}
+				http.SetCookie(w, &sessionCookie)
+
+				sessionCookie = http.Cookie{Name: "techToken", Value: token, HttpOnly: true}
+				http.SetCookie(w, &sessionCookie)
 				http.Redirect(w, r, "/tech", http.StatusTemporaryRedirect)
-				return
 			} else {
+				sessionCookie = http.Cookie{Name: "techToken", Value: "", HttpOnly: true, MaxAge: -1}
+				http.SetCookie(w, &sessionCookie)
+
+				sessionCookie = http.Cookie{Name: "adminToken", Value: token, HttpOnly: true}
+				http.SetCookie(w, &sessionCookie)
 				http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
-				return
 			}
+
+			return
 		}
 
 		log.Println(techLogin(username, password))
@@ -152,7 +148,6 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, headerView+string(content)+string(footer))
 
 	//http.ServeFile(w, r, "./www/views/home/home.html")
-
 }
 
 func loadAdmin(w http.ResponseWriter, r *http.Request) {
@@ -163,9 +158,11 @@ func loadAdmin(w http.ResponseWriter, r *http.Request) {
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
 	headerView := string(header)
+	headerView = headerDisconnect(r, headerView)
 	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Admin", 1)
 	headerView = strings.Replace(headerView, "{{H1}}", "Admin", 1)
 	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "none", 1)
+	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "block", 1)
 	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)
 
 	content, _ := os.ReadFile("./www/views/admin/admin.html")
@@ -199,8 +196,10 @@ func loadCreate(w http.ResponseWriter, r *http.Request) {
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
 	headerView := string(header)
+	headerView = headerDisconnect(r, headerView)
 	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Create", 1)
 	headerView = strings.Replace(headerView, "{{H1}}", "Create", 1)
+	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "block", 1)
 
 	switch r.Method {
 	case "GET":
@@ -249,8 +248,10 @@ func loadEdit(w http.ResponseWriter, r *http.Request) {
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
 	headerView := string(header)
+	headerView = headerDisconnect(r, headerView)
 	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Edit", 1)
 	headerView = strings.Replace(headerView, "{{H1}}", "Edit", 1)
+	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "block", 1)
 	content, _ := os.ReadFile("./www/views/admin/edit.html")
 	contentView := string(content)
 
@@ -357,10 +358,12 @@ func loadTech(w http.ResponseWriter, r *http.Request) {
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
 	headerView := string(header)
+	headerView = headerDisconnect(r, headerView)
 	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Tech", 1)
 	headerView = strings.Replace(headerView, "{{H1}}", "Tech", 1)
-	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
-	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "none", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)
+	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "block", 1)
 
 	content, _ := os.ReadFile("./www/views/home/tech.html")
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
@@ -376,11 +379,65 @@ func loadClient(w http.ResponseWriter, r *http.Request) {
 	headerView := string(header)
 	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Client", 1)
 	headerView = strings.Replace(headerView, "{{H1}}", "Client", 1)
+	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "none", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "none", 1)
+	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)
 
 	content, _ := os.ReadFile("./www/views/home/client.html")
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
 
 	io.WriteString(w, headerView+string(content)+string(footer))
+}
+
+func loadLogout(w http.ResponseWriter, r *http.Request) {
+	var cookie *http.Cookie
+	var currentCookie *http.Cookie
+	var err error
+
+	cookie, err = r.Cookie("adminToken")
+	if err == nil {
+		currentCookie = cookie
+	}
+
+	cookie, err = r.Cookie("techToken")
+	if err == nil {
+		currentCookie = cookie
+	}
+
+	if currentCookie == nil {
+		log.Println("No need to logout")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	queryId := r.URL.Query().Get("userId")
+
+	if queryId == "" {
+		log.Println("No id provided")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	userId, _ := strconv.Atoi(queryId)
+	username := getTechUsername(userId)
+
+	if username == "" {
+		log.Println("No user with this id exists")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	userToken := getToken(userId)
+
+	if userToken != currentCookie.Value {
+		log.Println("Invalid token")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	logoutUser(userId)
+
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
 func load404(w http.ResponseWriter, r *http.Request) {
@@ -393,6 +450,7 @@ func load404(w http.ResponseWriter, r *http.Request) {
 	headerView = strings.Replace(headerView, "{{H1}}", "404", 1)
 	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "none", 1)
 	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)
+	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "none", 1)
 
 	content, _ := os.ReadFile("./www/views/home/404.html")
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
@@ -401,7 +459,21 @@ func load404(w http.ResponseWriter, r *http.Request) {
 }
 
 func redirect(w http.ResponseWriter, r *http.Request, needAdmin bool) {
-	cookie, _ := r.Cookie("token")
+	var cookie *http.Cookie
+	var err error
+
+	if needAdmin {
+		cookie, err = r.Cookie("adminToken")
+
+	} else {
+		cookie, err = r.Cookie("techToken")
+	}
+
+	if err != nil {
+		log.Println("No cookie found")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
 	isConnected, isAdmin := isConnectedAndAdmin(cookie.Value)
 
 	if !isConnected {
@@ -418,5 +490,32 @@ func redirect(w http.ResponseWriter, r *http.Request, needAdmin bool) {
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
+}
 
+func headerDisconnect(r *http.Request, headerView string) string {
+	var cookie *http.Cookie
+	var err error
+	id := 0
+
+	cookie, err = r.Cookie("adminToken")
+	if err == nil {
+		id = getUserByToken(cookie.Value)
+	}
+
+	cookie, err = r.Cookie("techToken")
+	if err == nil {
+		id = getUserByToken(cookie.Value)
+	}
+
+	if id != 0 {
+		headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "block", 1)
+		headerView = strings.Replace(headerView, "{{LOGOUT_ID}}", strconv.Itoa(id), 1)
+
+		return headerView
+	}
+
+	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "none", 1)
+	headerView = strings.Replace(headerView, "{{LOGOUT_}}", "0", 1)
+
+	return headerView
 }

@@ -5,6 +5,20 @@ ws.onopen = function() {
 }
 
 ws.onmessage = function(e) {
+    if (e.data === "online") {
+        console.log("ONLINE");
+        try{
+            document.getElementById("button_offline").classList.add("d-none");
+            document.getElementById("button_online").classList.remove("d-none");
+        }catch (e){}
+    }
+    else if (e.data === "offline") {
+        console.log("OFFLINE");
+        try{
+            document.getElementById("button_online").classList.add("d-none");
+            document.getElementById("button_offline").classList.remove("d-none");
+        } catch (e){}
+    }
     console.log("RESPONSE: " + e.data); // Lorsqu'on reçoit un message
 }
 

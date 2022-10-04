@@ -96,6 +96,40 @@ func createToken(username string) string {
 	return token
 }
 
+func getToken(id int) string {
+	var token string
+
+	err := getDatabase().QueryRow("SELECT tech_token FROM Techs WHERE tech_id = ?;", id).Scan(&token)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return token
+}
+
+func getUserByToken(token string) int {
+	var id int
+
+	err := getDatabase().QueryRow("SELECT tech_id FROM Techs WHERE tech_token = ?;", token).Scan(&id)
+	if err != nil {
+		log.Println(err)
+		return 0
+	}
+
+	return id
+}
+
+func logoutUser(id int) bool {
+	statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_token = NULL WHERE tech_id = ?")
+	_, err := statement.Exec(id)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+	return true
+}
+
 func techLogin(username string, password string) int {
 	var passwordEncrypted string
 
