@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -114,7 +115,8 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 			headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
 			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
 		} else {
-			token := createToken(username)
+			token := hash(username + strconv.Itoa(rand.Intn(100)))
+			//token := createToken(username)
 			var sessionCookie http.Cookie
 
 			if techLogin(username, password) == 1 {
@@ -124,6 +126,8 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 				sessionCookie = http.Cookie{Name: "techToken", Value: token, HttpOnly: true}
 				http.SetCookie(w, &sessionCookie)
 				http.Redirect(w, r, "/tech", http.StatusTemporaryRedirect)
+
+				updateToken(username, token)
 			} else {
 				sessionCookie = http.Cookie{Name: "techToken", Value: "", HttpOnly: true, MaxAge: -1}
 				http.SetCookie(w, &sessionCookie)
@@ -143,9 +147,17 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 	headerView = strings.Replace(headerView, "{{H1}}", "Clavardage du C.A.I", 1)
 
 	content, _ := os.ReadFile("./www/views/home/home.html")
+	contentView := string(content)
+	if someoneIsConnected() {
+		contentView = strings.Replace(contentView, "{{ONLINE-VISIBILITY}}", "inline", 1)
+		contentView = strings.Replace(contentView, "{{OFFLINE-VISIBILITY}}", "none", 1)
+	} else {
+		contentView = strings.Replace(contentView, "{{ONLINE-VISIBILITY}}", "none", 1)
+		contentView = strings.Replace(contentView, "{{OFFLINE-VISIBILITY}}", "inline", 1)
+	}
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
 
-	io.WriteString(w, headerView+string(content)+string(footer))
+	io.WriteString(w, headerView+contentView+string(footer))
 
 	//http.ServeFile(w, r, "./www/views/home/home.html")
 }
@@ -172,9 +184,10 @@ func loadAdmin(w http.ResponseWriter, r *http.Request) {
 
 	tech := ""
 	allTechView := ""
+	techItem, _ := os.ReadFile("./www/views/templates/techItem.html")
+
 	for _, techId := range techIds {
 		tech = getTechUsername(techId)
-		techItem, _ := os.ReadFile("./www/views/templates/techItem.html")
 		techItemView := string(techItem)
 		techItemView = strings.Replace(techItemView, "{{TECH_ID}}", strconv.Itoa(techId), 2)
 		techItemView = strings.Replace(techItemView, "{{TECH_USERNAME}}", tech, 1)

@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 )
 
@@ -84,16 +83,14 @@ func deleteTech(id int) bool {
 	return true
 }
 
-func createToken(username string) string {
-	token := hash(username)
-
+func updateToken(username string, token string) bool {
 	statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_token = ? WHERE tech_username = ?")
 	_, err := statement.Exec(token, username)
 	if err != nil {
 		log.Fatal(err)
-		return ""
+		return false
 	}
-	return token
+	return true
 }
 
 func getToken(id int) string {
@@ -165,6 +162,20 @@ func techExists(username string) bool {
 	return true
 }
 
+func someoneIsConnected() bool {
+	var exists int
+
+	err := getDatabase().QueryRow("SELECT COUNT(tech_id) FROM Techs WHERE tech_token IS NOT NULL;").Scan(&exists)
+	if err != nil {
+		log.Print(err)
+	}
+
+	if exists == 0 {
+		return false
+	}
+	return true
+}
+
 func isConnectedAndAdmin(token string) (bool, bool) {
 	var isAdmin int
 
@@ -178,14 +189,4 @@ func isConnectedAndAdmin(token string) (bool, bool) {
 		return true, false
 	}
 	return true, true
-}
-
-func hash(password string) string {
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes)
-}
-
-func checkHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }
