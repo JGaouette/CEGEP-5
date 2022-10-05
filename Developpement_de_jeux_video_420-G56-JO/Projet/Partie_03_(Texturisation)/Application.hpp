@@ -64,7 +64,7 @@ public:
             }
             
             glContext.clear();
-            glContext.draw(); // Gestion de l'affichage
+            glContext.drawingParameters(); // Gestion de l'affichage
             glContext.drawRect(shrekTexture, 0, 0, 700, 500);
             glContext.drawText(shrekIsLloveTexture, 0, 0);
             

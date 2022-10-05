@@ -70,7 +70,6 @@ public:
         glDeleteTextures(1, &id);
     }
 
-
     /// @brief Retourne la largeur de la texture
     /// @return Largeur
     int getWidth(){

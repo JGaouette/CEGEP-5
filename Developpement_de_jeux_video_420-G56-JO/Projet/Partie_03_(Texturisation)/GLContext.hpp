@@ -48,8 +48,8 @@ public:
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-
-    void draw() {
+    /// @brief Définis les matrices de projection et de modèle
+    void drawingParameters() {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glMultMatrixd(projectionMatrix.elements);
