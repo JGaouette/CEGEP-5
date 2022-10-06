@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+/*
 func clientWebsocket(w http.ResponseWriter, r *http.Request, c chan string) {
 	var upgrader = websocket.Upgrader{} // use default options
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -17,6 +18,33 @@ func clientWebsocket(w http.ResponseWriter, r *http.Request, c chan string) {
 
 	go writer(conn, c)
 	go reader(conn, c)
+}
+*/
+
+func clientWs(w http.ResponseWriter, r *http.Request, techChan chan string, clientChan chan string) {
+	var upgrader = websocket.Upgrader{} // use default options
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	//defer conn.Close()
+
+	go writer(conn, techChan)
+	go reader(conn, clientChan)
+}
+
+func techWs(w http.ResponseWriter, r *http.Request, techChan chan string, clientChan chan string) {
+	var upgrader = websocket.Upgrader{} // use default options
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("upgrade:", err)
+		return
+	}
+	//defer conn.Close()
+
+	go writer(conn, clientChan)
+	go reader(conn, techChan)
 }
 
 func reader(conn *websocket.Conn, c chan string) {

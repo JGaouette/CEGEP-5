@@ -13,7 +13,8 @@ import (
 )
 
 func main() {
-	var chanclient = make(chan string)
+	var chanClient = make(chan string)
+	var chanTech = make(chan string)
 
 	if !techExists("admin") {
 		createTech("admin", "admin", true)
@@ -32,9 +33,11 @@ func main() {
 	http.HandleFunc("/", loadHome)
 	http.HandleFunc("/ws", loadWebsocket)
 	http.HandleFunc("/clientWs", func(w http.ResponseWriter, r *http.Request) {
-		clientWebsocket(w, r, chanclient)
+		clientWs(w, r, chanTech, chanClient)
 	})
-	//http.HandleFunc("/techWs", loadTechWebsocket)
+	http.HandleFunc("/techWs", func(w http.ResponseWriter, r *http.Request) {
+		techWs(w, r, chanTech, chanClient)
+	})
 
 	http.HandleFunc("/client", loadClient)
 	http.HandleFunc("/tech", loadTech)
