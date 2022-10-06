@@ -5,10 +5,11 @@
 #pragma once
 
 #include <map>
+#include <string>
 #include "GLContext.hpp"
 #include "Event.hpp"
-#include "texture.hpp"
-#include "font.hpp"
+#include "Texture.hpp"
+#include "TTFont.hpp"
 #include "Chrono.hpp"
 
 using namespace std;
@@ -40,15 +41,20 @@ public:
         int fps = 0 ;
         int actualFps = 0 ;
         bool isUp = true;
-        Texture* texture = new Texture("img/shrek.png");
-        Font* font = new Font("font/Norse.ttf", 48);
+        Texture* shrekTexture = new Texture("img/shrek.png");
+        
+        TTFont* font = new TTFont("font/Norse.ttf", 48);
+        SDL_Surface* srfShrek = font->renderText("Shrek is love <3", {255, 0, 0, 255});
+        Texture* shrekIsLloveTexture = new Texture(srfShrek);
+        
+        SDL_Surface* srfFPS = font->renderText("FPS: 0", {255, 0, 0, 255});
+        Texture* fpsTexture = new Texture(srfFPS);
+
         Chrono* chrono = new Chrono();
         chrono->startTimer();
 
         while(isUp){
-
             // Gestion des évènements
-
             while(Event::poll()){
                 switch(Event::getType()) {
                 case SDL_QUIT:
@@ -57,21 +63,22 @@ public:
                 }
             }
             
-            // Mise à jour de l'affichage
-
-
             glContext.clear();
-            glContext.draw(); // Gestion de l'affichage
-            glContext.drawRect(texture, 0, 0, 700, 500);
-            glContext.drawText(font, "Shrek is love!", {255, 0, 0, 255}, 0, 0);
+            glContext.drawingParameters(); // Gestion de l'affichage
+            glContext.drawRect(shrekTexture, 0, 0, 700, 500);
+            glContext.drawText(shrekIsLloveTexture, 0, 0);
             
             if(chrono->delta() >= 1){
                 chrono->reset();
                 actualFps = fps;
                 fps = 0;
+
+                srfFPS = font->renderText(("FPS: " + to_string(actualFps)).c_str(), {255, 0, 0, 255});
+                delete fpsTexture;
+                fpsTexture = new Texture(srfFPS);
             }
 
-            glContext.drawFPS(font, to_string(actualFps) , {255, 0, 0, 255});
+            glContext.drawFPS(fpsTexture);
 
             glContext.refresh(); 
             fps++;

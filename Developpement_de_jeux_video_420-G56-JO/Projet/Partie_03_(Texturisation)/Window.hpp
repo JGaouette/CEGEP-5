@@ -16,7 +16,7 @@ protected:
 public:
     int width, height; ///< Largeur et hauteur de la fenêtre
 
-    /// @brief 
+    /// @brief Constructeur de la fenêtre
     /// @param title Titre de la fenêtre
     /// @param x  Position sur l'axe des x
     /// @param y Position sur l'axe des y

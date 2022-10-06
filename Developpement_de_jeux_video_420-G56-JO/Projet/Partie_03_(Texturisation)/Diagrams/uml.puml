@@ -6,14 +6,23 @@ abstract class Window {
     + OnRefresh()
 }
 
-class SDLRenderer extends Window {
-    - SDLRenderer : SDLRenderer
-}
-
 class GLContext extends Window{
     - GLContext : SDL_GLContext
 }
 
+GLContext *--"2" Matrix44d
+
+class Observable {
+
+}
+
+Observable o--"*" Observer
+
+class Observer {
+
+}
+
+Observer o-- UIElements
 
 class Event {
     - {static}SDLEvent : SDL_Event
@@ -27,12 +36,121 @@ class Application extends Singleton{
     + Start()
 }
 
+Application "1" *-- "1" Window
+Application *--"*" TTFont
+Application *--"*" Texture
+Application *--"*" Scene
+Application *--"1" Chrono
+
 class Singleton << (S,orange) Singleton>> {
     - _instance
     + GetInstance()
 }
 
-Application "1" *--> "*" Window
+class TTFont {
+    - font : TTF_Font
+}
 
+class Texture {
+    - Texture : SDL_Texture
+}
+
+class Chrono {
+
+}
+
+class Matrix44d {
+
+}
+
+class Vector33d {
+
+}
+
+Vector33d .. Matrix44d
+
+class UIElements {
+
+}
+
+UIElements <|-- Button
+UIElements <|-- Label
+UIElements <|-- Image
+UIElements <|-- TextBox
+UIElements <|-- CheckBox
+UIElements <|-- ProgressBar
+
+
+class Button {
+
+}
+
+class CheckBox {
+
+}
+
+class Label {
+
+}
+
+
+class Image {
+
+}
+
+class ProgressBar {
+
+}
+
+class TextBox {
+
+}
+
+class Scene {
+
+}
+
+Scene *-- UIElements
+Scene *-- Observable
+Scene <|-- Menu
+Scene <|-- SaveMenu
+Scene <|-- Options
+Scene <|-- PaperBall
+Scene <|-- ChairRace
+Scene <|-- EscapePhil
+Scene <|-- ArchNetwork
+Scene <|-- Terminal
+
+class Menu {
+
+}
+
+class SaveMenu {
+
+}
+
+class Options {
+
+}
+
+class PaperBall {
+
+}
+
+class ChairRace {
+
+}
+
+class EscapePhil {
+
+}
+
+class ArchNetwork {
+
+}
+
+class Terminal {
+
+}
 
 @enduml
