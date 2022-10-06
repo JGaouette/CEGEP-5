@@ -30,8 +30,6 @@ func main() {
 	http.HandleFunc("/", loadHome)
 	http.HandleFunc("/ws", loadWebsocket)
 
-	//http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) { serveWs(hub, w, r) })
-
 	http.HandleFunc("/client", loadClient)
 	http.HandleFunc("/tech", loadTech)
 	http.HandleFunc("/404", load404)
@@ -116,7 +114,6 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
 		} else {
 			token := hash(username + strconv.Itoa(rand.Intn(100)))
-			//token := createToken(username)
 			var sessionCookie http.Cookie
 
 			if techLogin(username, password) == 1 {
@@ -148,6 +145,7 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 
 	content, _ := os.ReadFile("./www/views/home/home.html")
 	contentView := string(content)
+
 	if someoneIsConnected() {
 		contentView = strings.Replace(contentView, "{{ONLINE-VISIBILITY}}", "inline", 1)
 		contentView = strings.Replace(contentView, "{{OFFLINE-VISIBILITY}}", "none", 1)
@@ -404,20 +402,17 @@ func loadClient(w http.ResponseWriter, r *http.Request) {
 
 func loadLogout(w http.ResponseWriter, r *http.Request) {
 	var cookie *http.Cookie
-	var currentCookie *http.Cookie
 	var err error
 
 	cookie, err = r.Cookie("adminToken")
 	if err == nil {
-		currentCookie = cookie
+		sessionCookie := http.Cookie{Name: "adminToken", Value: "", HttpOnly: true, MaxAge: -1}
+		http.SetCookie(w, &sessionCookie)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
 
 	cookie, err = r.Cookie("techToken")
-	if err == nil {
-		currentCookie = cookie
-	}
-
-	if currentCookie == nil {
+	if err != nil {
 		log.Println("No need to logout")
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
@@ -442,13 +437,15 @@ func loadLogout(w http.ResponseWriter, r *http.Request) {
 
 	userToken := getToken(userId)
 
-	if userToken != currentCookie.Value {
+	if userToken != cookie.Value {
 		log.Println("Invalid token")
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
 
 	logoutUser(userId)
+	sessionCookie := http.Cookie{Name: "techToken", Value: "", HttpOnly: true, MaxAge: -1}
+	http.SetCookie(w, &sessionCookie)
 
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
@@ -477,29 +474,25 @@ func redirect(w http.ResponseWriter, r *http.Request, needAdmin bool) {
 
 	if needAdmin {
 		cookie, err = r.Cookie("adminToken")
-
-	} else {
-		cookie, err = r.Cookie("techToken")
+		if err != nil {
+			log.Println("No cookie found")
+			http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+			return
+		}
+		return
 	}
+
+	cookie, err = r.Cookie("techToken")
 
 	if err != nil {
 		log.Println("No cookie found")
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
-	isConnected, isAdmin := isConnectedAndAdmin(cookie.Value)
+
+	isConnected := isConnected(cookie.Value)
 
 	if !isConnected {
-		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
-		return
-	}
-
-	if !needAdmin && isAdmin {
-		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
-		return
-	}
-
-	if needAdmin && !isAdmin {
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
@@ -512,15 +505,15 @@ func headerDisconnect(r *http.Request, headerView string) string {
 
 	cookie, err = r.Cookie("adminToken")
 	if err == nil {
-		id = getUserByToken(cookie.Value)
+		headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "block", 1)
+		headerView = strings.Replace(headerView, "{{LOGOUT_ID}}", "1", 1)
+
+		return headerView
 	}
 
 	cookie, err = r.Cookie("techToken")
 	if err == nil {
 		id = getUserByToken(cookie.Value)
-	}
-
-	if id != 0 {
 		headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "block", 1)
 		headerView = strings.Replace(headerView, "{{LOGOUT_ID}}", strconv.Itoa(id), 1)
 

@@ -6,10 +6,15 @@ import (
 	"log"
 )
 
+var database *sql.DB
+
 func getDatabase() *sql.DB {
-	database, err := sql.Open("sqlite3", "./db/technicians.db")
-	if err != nil {
-		log.Fatal(err)
+	if database == nil {
+		var err error
+		database, err = sql.Open("sqlite3", "./db/technicians.db")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	return database
 }
@@ -47,6 +52,7 @@ func getTechUsername(id int) string {
 func updateTech(id int, username string, password string) bool {
 	statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_username = ?, tech_password = ? WHERE tech_id = ?")
 	_, err := statement.Exec(username, any(hash(password)), id)
+
 	if err != nil {
 		log.Fatal(err)
 		return false
@@ -163,9 +169,19 @@ func techExists(username string) bool {
 }
 
 func someoneIsConnected() bool {
+	var id int
+
+	err := getDatabase().QueryRow("SELECT tech_id FROM Techs WHERE tech_token <> '';").Scan(&id)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func isConnected(token string) bool {
 	var exists int
 
-	err := getDatabase().QueryRow("SELECT COUNT(tech_id) FROM Techs WHERE tech_token IS NOT NULL;").Scan(&exists)
+	err := getDatabase().QueryRow("SELECT COUNT(tech_id) FROM Techs WHERE tech_token = ?;", token).Scan(&exists)
 	if err != nil {
 		log.Print(err)
 	}
