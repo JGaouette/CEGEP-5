@@ -6,11 +6,22 @@ ws.onclose = function(e) {
     console.log("CLOSE");
     ws = null; // Fermeture du socket
 }
-ws.onmessage = function(e) {
-    console.log("RESPONSE: " + e.data); // Lorsqu'on reçoit un message
-}
+
 ws.onerror = function(e) {
     console.log("ERROR: " + e.data);
+}
+
+let container = document.getElementById("message-container");
+
+ws.onmessage = function(e) {
+    console.log("RESPONSE: " + e.data); // Lorsqu'on reçoit un message
+
+    var p = document.createElement("p");
+    var b = document.createElement("b");
+    b.innerHTML = "Technicien";
+    p.appendChild(b);
+    p.innerHTML += ": " + e.data;
+    container.appendChild(p);
 }
 
 document.getElementById("submit").onclick = function(e) {
@@ -20,6 +31,18 @@ document.getElementById("submit").onclick = function(e) {
     }
     let input = document.getElementById("msg").value;
     console.log("SEND: " + input);
-    ws.send(input.value); // Envoi d'un message
+    ws.send(input);// Envoi d'un message
+
+    var p = document.createElement("p");
+    var b = document.createElement("b");
+    b.innerHTML = "Vous";
+    p.appendChild(b);
+    p.innerHTML += ": " + input;
+    container.appendChild(p);
+
     return false;
 };
+
+window.addEventListener("beforeunload", function (e) {
+    ws.close();
+});

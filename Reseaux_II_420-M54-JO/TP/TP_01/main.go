@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/gorilla/websocket"
 	"io"
 	"log"
 	"math/rand"
@@ -14,7 +13,9 @@ import (
 
 func main() {
 	var chanClient = make(chan string)
+	defer close(chanClient)
 	var chanTech = make(chan string)
+	defer close(chanTech)
 
 	if !techExists("admin") {
 		createTech("admin", "admin", true)
@@ -31,7 +32,7 @@ func main() {
 		go hub.run()
 	*/
 	http.HandleFunc("/", loadHome)
-	http.HandleFunc("/ws", loadWebsocket)
+	//http.HandleFunc("/ws", loadWebsocket)
 	http.HandleFunc("/clientWs", func(w http.ResponseWriter, r *http.Request) {
 		clientWs(w, r, chanTech, chanClient)
 	})
@@ -58,41 +59,6 @@ func main() {
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
-	}
-}
-
-func loadWebsocket(w http.ResponseWriter, r *http.Request) {
-	var upgrader = websocket.Upgrader{} // use default options
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("upgrade:", err)
-		return
-	}
-	defer conn.Close()
-
-	var isConnected bool
-
-	cookie, err := r.Cookie("techToken")
-	log.Println(r.Cookies())
-	if err != nil {
-		log.Println("No tech logged in")
-		isConnected = false
-	} else {
-		isConnected, _ = isConnectedAndAdmin(cookie.Value)
-	}
-
-	if isConnected {
-		err = conn.WriteMessage(websocket.TextMessage, []byte("online"))
-		if err != nil {
-			log.Println("write:", err)
-		}
-	} else {
-		err = conn.WriteMessage(websocket.TextMessage, []byte("offline"))
-		if err != nil {
-			log.Println("write:", err)
-		}
 	}
 }
 
@@ -276,35 +242,33 @@ func loadEdit(w http.ResponseWriter, r *http.Request) {
 	contentView := string(content)
 
 	techId := 0
-	techUsername := ""
+	queryId := r.URL.Query().Get("techId")
+
+	if queryId == "" {
+		log.Println("No techId provided")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	techId, _ = strconv.Atoi(queryId)
+	techUsername := getTechUsername(techId)
+
+	if techId == 1 {
+		log.Println("You do not have the permission to edit this user")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+
+	if techUsername == "" || techId == 0 {
+		log.Println("No user with this id exists")
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
 
 	switch r.Method {
 	case "GET":
 		headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "none", 1)
 		headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)
-
-		queryId := r.URL.Query().Get("techId")
-
-		if queryId == "" {
-			log.Println("No techId provided")
-			http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
-			return
-		}
-
-		techId, _ = strconv.Atoi(queryId)
-		techUsername = getTechUsername(techId)
-
-		if techId == 1 {
-			log.Println("You do not have the permission to edit this user")
-			http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
-			return
-		}
-
-		if techUsername == "" {
-			log.Println("No user with this id exists")
-			http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
-			return
-		}
 
 	case "POST":
 		r.ParseForm()
