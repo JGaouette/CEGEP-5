@@ -9,14 +9,20 @@ ws.onerror = function(e) {
 let container = document.getElementById("message-container");
 
 ws.onmessage = function(e) {
-    console.log("RESPONSE: " + e.data); // Lorsqu'on reçoit un message
+    alert(JSON.stringify(e.data));
+
+    let message = JSON.parse(e.data);
+    console.log("RESPONSE: " + toString(message)); // Lorsqu'on reçoit un message
+
     var p = document.createElement("p");
     var b = document.createElement("b");
-    b.innerHTML = "Client";
-    p.appendChild(b);
-    p.innerHTML += ": " + e.data;
-    container.appendChild(p);
 
+    b.innerHTML = message.fromTech ? "Technicien" : "Client";
+
+    p.appendChild(b);
+
+    p.innerHTML += ": " + message.value;
+    container.appendChild(p);
 }
 
 document.getElementById("submit").onclick = function(e) {
@@ -26,15 +32,12 @@ document.getElementById("submit").onclick = function(e) {
     }
     let input = document.getElementById("msg").value;
     console.log("SEND: " + input);
-    ws.send(input); // Envoi d'un message
+    //ws.send(input); // Envoi d'un message
 
-    //Add message to the container
-    var p = document.createElement("p");
-    var b = document.createElement("b");
-    b.innerHTML = "Vous";
-    p.appendChild(b);
-    p.innerHTML += ": " + input;
-    container.appendChild(p);
+    ws.send(JSON.stringify({
+        fromTech: true,
+        value: input
+    }));
 
     return false;
 };

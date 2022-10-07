@@ -1,6 +1,6 @@
 package main
 
-type Message struct {
+type message struct {
 	fromTech bool
-	msg      string
+	value    string
 }

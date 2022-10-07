@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	var chanClient = make(chan string)
+	var chanClient = make(chan message)
 	defer close(chanClient)
-	var chanTech = make(chan string)
+	var chanTech = make(chan message)
 	defer close(chanTech)
 
 	if !techExists("admin") {
@@ -32,7 +32,6 @@ func main() {
 		go hub.run()
 	*/
 	http.HandleFunc("/", loadHome)
-	//http.HandleFunc("/ws", loadWebsocket)
 	http.HandleFunc("/clientWs", func(w http.ResponseWriter, r *http.Request) {
 		clientWs(w, r, chanTech, chanClient)
 	})
@@ -338,6 +337,7 @@ func loadTech(w http.ResponseWriter, r *http.Request) {
 	redirect(w, r, false)
 
 	w.Header().Set("Content-Type", "text/html")
+
 	log.Println(r.URL)
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
