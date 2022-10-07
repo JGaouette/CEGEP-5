@@ -3,6 +3,7 @@ package com.example.black_jack
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -11,36 +12,48 @@ import kotlin.math.round
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var jeuCarte: ImageView
+    private lateinit var jeuCarte: ImageView
+    private lateinit var dealerLayout: LinearLayout
+    private lateinit var playerLayout: LinearLayout
+    private var playerCards = 0
+    private var dealerCards = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val mainLayout = findViewById<ConstraintLayout>(R.id.mainLayout)
-        val subLayout = findViewById<LinearLayout>(R.id.subLayout)
+        val btnHit = findViewById<Button>(R.id.btnHit)
+        val btnStand = findViewById<Button>(R.id.btnStand)
 
-        //create an imageview with jeu_carte.png
+        dealerLayout = findViewById(R.id.dealerLayout)
+        playerLayout = findViewById(R.id.playerLayout)
+
+        //Declare a list of imageview
+        btnHit.setOnClickListener {
+            val carte = ImageView(this)
+            carte.setImageBitmap(getCard("2","Coeur"))
+            addCardToLayout(playerLayout, carte)
+            playerCards++
+        }
+
         jeuCarte = ImageView(this)
         jeuCarte.setImageResource(R.drawable.jeu_carte)
-
-        val carte = ImageView(this)
-        carte.setImageBitmap(getCover())
-        carte.x = 0f
-        carte.y = 0f
-        subLayout.addView(carte)
-
-
-/*
-        mainLayout.addView(jeuCarte)
-
-        jeuCarte.layoutParams.height = 200
-        jeuCarte.layoutParams.width = 200
-        jeuCarte.x = 300F
-        jeuCarte.y = 500F*/
     }
 
-    fun getCard(rank: String, suit: String): Bitmap {
+    private fun addCardToLayout(layout: LinearLayout, card: ImageView) {
+        val cardNumber: Int = if(layout.id == dealerLayout.id){
+            dealerCards
+        }else{
+            playerCards
+        }
+
+        card.x = -((layout.width + cardNumber * 50) / 3).toFloat()
+        card.y = 0f
+        layout.addView(card)
+    }
+
+    private fun getCard(rank: String, suit: String): Bitmap {
         val col: Int = when (rank) {
             "As" -> 1
             "2" -> 2
@@ -82,15 +95,16 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun getCover(): Bitmap {
+
+    private fun getCover(): Bitmap {
         val width = 192
         val height = 279.5
         return Bitmap.createBitmap(
             (jeuCarte.drawable as BitmapDrawable).bitmap,
-            2 * width,
-            round(4 * height).toInt(),
-            width,
-            round(height).toInt()
+            384,
+            1117,
+            192,
+            279
         )
     }
 }

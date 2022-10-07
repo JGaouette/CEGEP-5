@@ -2,38 +2,73 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/mainLayout"
+    android:background="#349138"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:id="@+id/dealerLayout"
+        android:layout_width="0dp"
+        android:layout_height="260dp"
+        android:layout_marginStart="130dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginEnd="130dp"
+        android:background="#5AB65F"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/playerLayout"
+        android:layout_width="0dp"
+        android:layout_height="260dp"
+        android:layout_marginStart="130dp"
+        android:layout_marginEnd="130dp"
+        android:layout_marginBottom="80dp"
+        android:background="#5AB65F"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"></LinearLayout>
+
+    <Button
+        android:id="@+id/btnHit"
+        android:layout_width="161dp"
+        android:layout_height="81dp"
+        android:text="@string/main_btnHit_text"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/playerLayout"
+        app:layout_constraintStart_toStartOf="@+id/dealerLayout"
+        app:layout_constraintTop_toBottomOf="@+id/dealerLayout" />
+
+    <Button
+        android:id="@+id/btnStand"
+        android:layout_width="161dp"
+        android:layout_height="81dp"
+        android:text="@string/main_btnStand_text"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/playerLayout"
+        app:layout_constraintEnd_toEndOf="@+id/dealerLayout"
+        app:layout_constraintTop_toBottomOf="@+id/dealerLayout" />
+
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ScrollView
-        android:layout_width="1278dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="SpeakableTextPresentCheck">
-
-        <LinearLayout
-            android:id="@+id/subLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+        android:id="@+id/txtBet"
+        android:layout_width="216dp"
+        android:layout_height="76dp"
+        android:fontFamily="sans-serif-black"
+        android:text="@string/main_txtBet_text"
+        android:textAlignment="center"
+        android:textColor="#263238"
+        android:textSize="60sp"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/playerLayout"
+        app:layout_constraintEnd_toStartOf="@+id/btnStand"
+        app:layout_constraintStart_toEndOf="@+id/btnHit"
+        app:layout_constraintTop_toBottomOf="@+id/dealerLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
