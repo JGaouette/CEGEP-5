@@ -31,7 +31,8 @@ func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- message, cha
 		select {
 		case msg := <-chanClient:
 			log.Println("Message received by client: ", msg)
-			err := conn.WriteJSON(msg)
+			toSend, _ := json.Marshal(msg)
+			err := conn.WriteJSON(toSend)
 			if err != nil {
 				log.Println("WriteJSON() error: ", err)
 				break
@@ -70,7 +71,8 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan message, c
 		case msg := <-chanTech:
 			log.Println("Message received by tech: ", msg)
 			//conn.WriteMessage(websocket.TextMessage, []byte(msg))
-			err := conn.WriteJSON(msg)
+			toSend, _ := json.Marshal(msg)
+			err := conn.WriteJSON(toSend)
 			if err != nil {
 				log.Println("WriteJSON() error: ", err)
 				break
@@ -109,12 +111,14 @@ func write(conn *websocket.Conn, c chan<- message, chanClose chan<- bool) {
 				conn.WriteMessage(websocket.TextMessage, msg)
 				c <- string(msg)
 			*/
-			err := conn.WriteJSON(message)
+			toSend, _ := json.Marshal(message)
+			err := conn.WriteJSON(toSend)
 			if err != nil {
 				log.Println("WriteJSON() error: ", err)
 				return
 			}
 			log.Println("Sending: ", message.value+" from tech: ", message.fromTech)
+
 			c <- message
 		}
 	}

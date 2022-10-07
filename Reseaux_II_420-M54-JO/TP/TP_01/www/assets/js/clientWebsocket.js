@@ -14,10 +14,14 @@ ws.onerror = function(e) {
 let container = document.getElementById("message-container");
 
 ws.onmessage = function(e) {
-    alert(JSON.stringify(e.data));
+    /*alert(JSON.stringify(e.data));
 
+
+    console.log("RESPONSE: " + toString(message)); // Lorsqu'on reçoit un message
+*/
     let message = JSON.parse(e.data);
-    //console.log("RESPONSE: " + toString(message)); // Lorsqu'on reçoit un message
+    console.log("RESPONSE: " + message);
+    console.log("RESPONSE: " + e.data);
 
     var p = document.createElement("p");
     var b = document.createElement("b");
