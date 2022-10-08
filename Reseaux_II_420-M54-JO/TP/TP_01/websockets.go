@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- message, chanClient <-chan message) {
+func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- Message, chanClient <-chan Message) {
 	var upgrader = websocket.Upgrader{}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -31,13 +31,11 @@ func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- message, cha
 		select {
 		case msg := <-chanClient:
 			log.Println("Message received by client: ", msg)
-			toSend, _ := json.Marshal(msg)
-			err := conn.WriteJSON(toSend)
+			err := conn.WriteJSON(msg)
 			if err != nil {
 				log.Println("WriteJSON() error: ", err)
 				break
 			}
-			//conn.WriteMessage(websocket.TextMessage, []byte(msg))
 
 		case <-chanClose:
 			log.Println("Tech disconnected")
@@ -46,7 +44,7 @@ func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- message, cha
 	}
 }
 
-func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan message, chanClient chan<- message) {
+func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan Message, chanClient chan<- Message) {
 	var upgrader = websocket.Upgrader{}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -70,9 +68,7 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan message, c
 		select {
 		case msg := <-chanTech:
 			log.Println("Message received by tech: ", msg)
-			//conn.WriteMessage(websocket.TextMessage, []byte(msg))
-			toSend, _ := json.Marshal(msg)
-			err := conn.WriteJSON(toSend)
+			err := conn.WriteJSON(msg)
 			if err != nil {
 				log.Println("WriteJSON() error: ", err)
 				break
@@ -85,8 +81,8 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan message, c
 	}
 }
 
-func write(conn *websocket.Conn, c chan<- message, chanClose chan<- bool) {
-	var message message
+func write(conn *websocket.Conn, c chan<- Message, chanClose chan<- bool) {
+	var message Message
 	defer func() { chanClose <- true }()
 	for {
 		msgType, msg, err := conn.ReadMessage()
@@ -107,18 +103,7 @@ func write(conn *websocket.Conn, c chan<- message, chanClose chan<- bool) {
 		}
 
 		if msgType == websocket.TextMessage {
-			/*
-				conn.WriteMessage(websocket.TextMessage, msg)
-				c <- string(msg)
-			*/
-			toSend, _ := json.Marshal(message)
-			err := conn.WriteJSON(toSend)
-			if err != nil {
-				log.Println("WriteJSON() error: ", err)
-				return
-			}
-			log.Println("Sending: ", message.value+" from tech: ", message.fromTech)
-
+			log.Println("Sending: ", message)
 			c <- message
 		}
 	}

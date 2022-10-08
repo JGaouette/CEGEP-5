@@ -9,24 +9,17 @@ ws.onerror = function(e) {
 let container = document.getElementById("message-container");
 
 ws.onmessage = function(e) {
-    /*
-    alert(JSON.stringify(e.data));
-
     let message = JSON.parse(e.data);
-    console.log("RESPONSE: " + toString(message)); // Lorsqu'on reçoit un message
-*/
-    let message = JSON.parse(e.data);
-    console.log("RESPONSE: " + message);
     console.log("RESPONSE: " + e.data);
 
     const p = document.createElement("p");
     const b = document.createElement("b");
 
-    b.innerHTML = message.fromTech ? "Technicien" : "Client";
+    b.innerHTML = message.FromTech ? "Vous" : "Client";
 
     p.appendChild(b);
 
-    p.innerHTML += ": " + message.value;
+    p.innerHTML += ": " + message.Value;
     container.appendChild(p);
 }
 
@@ -35,14 +28,15 @@ document.getElementById("submit").onclick = function(e) {
     if (!ws) {
         return false;
     }
-    let input = document.getElementById("msg").value;
-    console.log("SEND: " + input);
-    //ws.send(input); // Envoi d'un message
+    let input = document.getElementById("msg");
+    console.log("SEND: " + input.value);
 
     ws.send(JSON.stringify({
-        fromTech: true,
-        value: input
+        FromTech: true,
+        Value: input.value
     }));
+
+    input.value = "";
 
     return false;
 };

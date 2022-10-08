@@ -12,9 +12,10 @@ import (
 )
 
 func main() {
-	var chanClient = make(chan message)
+	//chanClients := make(map[string]chan Message)
+	var chanClient = make(chan Message)
 	defer close(chanClient)
-	var chanTech = make(chan message)
+	var chanTech = make(chan Message)
 	defer close(chanTech)
 
 	if !techExists("admin") {
@@ -27,10 +28,6 @@ func main() {
 	//Init server
 	var addr = flag.String("addr", ":8080", "http service address")
 	flag.Parse()
-	/*
-		hub := later.newHub()
-		go hub.run()
-	*/
 	http.HandleFunc("/", loadHome)
 	http.HandleFunc("/clientWs", func(w http.ResponseWriter, r *http.Request) {
 		clientWs(w, r, chanTech, chanClient)
