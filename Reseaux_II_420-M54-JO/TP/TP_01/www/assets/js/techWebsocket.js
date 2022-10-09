@@ -15,7 +15,7 @@ ws.onmessage = function(e) {
     const p = document.createElement("p");
     const b = document.createElement("b");
 
-    b.innerHTML = message.FromTech ? "Vous" : "Client";
+    b.innerHTML = message.ID === 0 ? "Vous" : "Client";
 
     p.appendChild(b);
 
@@ -32,7 +32,7 @@ document.getElementById("submit").onclick = function(e) {
     console.log("SEND: " + input.value);
 
     ws.send(JSON.stringify({
-        FromTech: true,
+        ID: 0,
         Value: input.value
     }));
 

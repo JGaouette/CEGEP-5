@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- Message, chanClient <-chan Message) {
+func techWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Message, chanClient chan Message) {
 	var upgrader = websocket.Upgrader{}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -26,7 +26,12 @@ func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- Message, cha
 		log.Print("upgrade:", err)
 		return
 	}
-	go write(conn, chanTech, chanClose)
+
+	id := len(chanTechs) + 1
+	chanTechs[id] = make(chan Message)
+
+	go write(conn, chanTechs[id], chanClose)
+
 	for {
 		select {
 		case msg := <-chanClient:
@@ -44,7 +49,7 @@ func techWs(w http.ResponseWriter, r *http.Request, chanTech chan<- Message, cha
 	}
 }
 
-func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan Message, chanClient chan<- Message) {
+func clientWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Message, chanClient chan Message) {
 	var upgrader = websocket.Upgrader{}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -55,7 +60,7 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan Message, c
 
 	w.Header().Add("Content-Type", "text/json")
 
-	var chanClose chan bool = make(chan bool)
+	var chanClose = make(chan bool)
 	defer close(chanClose)
 
 	log.Println("Connect to WebSocket: ", r.RemoteAddr)
@@ -66,7 +71,7 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan Message, c
 	go write(conn, chanClient, chanClose)
 	for {
 		select {
-		case msg := <-chanTech:
+		case msg := <-chanTechs[-1]:
 			log.Println("Message received by tech: ", msg)
 			err := conn.WriteJSON(msg)
 			if err != nil {
@@ -81,7 +86,7 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTech <-chan Message, c
 	}
 }
 
-func write(conn *websocket.Conn, c chan<- Message, chanClose chan<- bool) {
+func write(conn *websocket.Conn, c chan Message, chanClose chan bool) {
 	var message Message
 	defer func() { chanClose <- true }()
 	for {

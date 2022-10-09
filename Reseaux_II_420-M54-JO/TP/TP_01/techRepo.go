@@ -123,9 +123,9 @@ func getUserByToken(token string) int {
 	return id
 }
 
-func logoutUser(id int) bool {
-	statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_token = NULL WHERE tech_id = ?")
-	_, err := statement.Exec(id)
+func logoutUser(id int, logoutTime string) bool {
+	statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_token = NULL, tech_logout_time = ? WHERE tech_id = ?")
+	_, err := statement.Exec(logoutTime, id)
 	if err != nil {
 		log.Fatal(err)
 		return false
@@ -133,7 +133,7 @@ func logoutUser(id int) bool {
 	return true
 }
 
-func techLogin(username string, password string) int {
+func techLogin(username string, password string, loginTime string) int {
 	var passwordEncrypted string
 
 	err := getDatabase().QueryRow("SELECT tech_password FROM Techs WHERE tech_username = ?;", username).Scan(&passwordEncrypted)
@@ -149,6 +149,12 @@ func techLogin(username string, password string) int {
 	var isAdmin int
 	getDatabase().QueryRow("SELECT tech_admin FROM Techs WHERE tech_username = ?;", username).Scan(&isAdmin)
 	if isAdmin == 0 {
+		statement, _ := getDatabase().Prepare("UPDATE Techs SET tech_login_time = ? WHERE tech_username = ?")
+		_, err := statement.Exec(loginTime, username)
+		if err != nil {
+			log.Fatal(err)
+			return 0
+		}
 		return 1
 	}
 	return 2
@@ -166,6 +172,23 @@ func techExists(username string) bool {
 		return false
 	}
 	return true
+}
+
+func getTechHistoric(id int) (string, string) {
+	var loginTime string
+	var logoutTime string
+
+	err := getDatabase().QueryRow("SELECT tech_login_time FROM Techs WHERE tech_id = ?;", id).Scan(&loginTime)
+	if err != nil {
+		loginTime = "N/A"
+	}
+
+	err = getDatabase().QueryRow("SELECT tech_logout_time FROM Techs WHERE tech_id = ?;", id).Scan(&logoutTime)
+	if err != nil {
+		logoutTime = "N/A"
+	}
+
+	return loginTime, logoutTime
 }
 
 func someoneIsConnected() bool {
@@ -190,19 +213,4 @@ func isConnected(token string) bool {
 		return false
 	}
 	return true
-}
-
-func isConnectedAndAdmin(token string) (bool, bool) {
-	var isAdmin int
-
-	err := getDatabase().QueryRow("SELECT tech_admin FROM Techs WHERE tech_token = ?;", token).Scan(&isAdmin)
-	if err != nil {
-		log.Println(err)
-		return false, false
-	}
-
-	if isAdmin == 0 {
-		return true, false
-	}
-	return true, true
 }

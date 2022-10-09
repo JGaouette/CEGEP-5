@@ -9,15 +9,18 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
-	//chanClients := make(map[string]chan Message)
 	var chanClient = make(chan Message)
 	defer close(chanClient)
-	var chanTech = make(chan Message)
-	defer close(chanTech)
 
+	chanTechs := make(map[int]chan Message)
+	/*
+		var chanTech = make(chan Message)
+		defer close(chanTech)
+	*/
 	if !techExists("admin") {
 		createTech("admin", "admin", true)
 	}
@@ -30,10 +33,10 @@ func main() {
 	flag.Parse()
 	http.HandleFunc("/", loadHome)
 	http.HandleFunc("/clientWs", func(w http.ResponseWriter, r *http.Request) {
-		clientWs(w, r, chanTech, chanClient)
+		clientWs(w, r, chanTechs, chanClient)
 	})
 	http.HandleFunc("/techWs", func(w http.ResponseWriter, r *http.Request) {
-		techWs(w, r, chanTech, chanClient)
+		techWs(w, r, chanTechs, chanClient)
 	})
 
 	http.HandleFunc("/client", loadClient)
@@ -59,6 +62,8 @@ func main() {
 }
 
 func loadHome(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+
 	log.Println(r.URL)
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
@@ -80,22 +85,28 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 		username := r.Form.Get("username")
 		password := r.Form.Get("password")
 
-		if techLogin(username, password) == 0 {
+		if techLogin(username, password, now.Format("2006-01-02 15:04:05")) == 0 {
 			headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
 			headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Information de connection invalide, veuillez réessayer.", 1)
 		} else {
 			token := hash(username + strconv.Itoa(rand.Intn(100)))
 			var sessionCookie http.Cookie
 
-			if techLogin(username, password) == 1 {
-				sessionCookie = http.Cookie{Name: "adminToken", Value: "", HttpOnly: true, MaxAge: -1}
-				http.SetCookie(w, &sessionCookie)
+			if techLogin(username, password, now.Format("2006-01-02 15:04:05")) == 1 {
+				if someoneIsConnected() {
+					headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "inline", 1)
+					headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "Un technicien est déjà connecté, veuillez réessayer plus tard", 1)
+				} else {
+					sessionCookie = http.Cookie{Name: "adminToken", Value: "", HttpOnly: true, MaxAge: -1}
+					http.SetCookie(w, &sessionCookie)
 
-				sessionCookie = http.Cookie{Name: "techToken", Value: token, HttpOnly: true}
-				http.SetCookie(w, &sessionCookie)
-				http.Redirect(w, r, "/tech", http.StatusTemporaryRedirect)
+					sessionCookie = http.Cookie{Name: "techToken", Value: token, HttpOnly: true}
+					http.SetCookie(w, &sessionCookie)
+					http.Redirect(w, r, "/tech", http.StatusTemporaryRedirect)
 
-				updateToken(username, token)
+					updateToken(username, token)
+					return
+				}
 			} else {
 				sessionCookie = http.Cookie{Name: "techToken", Value: "", HttpOnly: true, MaxAge: -1}
 				http.SetCookie(w, &sessionCookie)
@@ -103,12 +114,10 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 				sessionCookie = http.Cookie{Name: "adminToken", Value: token, HttpOnly: true}
 				http.SetCookie(w, &sessionCookie)
 				http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
+				return
 			}
-
-			return
 		}
-
-		log.Println(techLogin(username, password))
+		log.Println("Login: ", techLogin(username, password, now.Format("2006-01-02 15:04:05")))
 	}
 
 	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Home", 1)
@@ -117,13 +126,37 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 	content, _ := os.ReadFile("./www/views/home/home.html")
 	contentView := string(content)
 
-	if someoneIsConnected() {
+	cookie, err := r.Cookie("techToken")
+	if err != nil {
+		log.Println("No tech token")
+	}
+
+	var cookieValue string
+
+	if cookie != nil {
+		cookieValue = cookie.Value
+	} else {
+		cookieValue = "FALSE"
+	}
+
+	if isConnected(cookieValue) {
+		contentView = strings.Replace(contentView, "{{YOU-ARE-CONNECTED-VISIBILITY}}", "inline", 1)
+		contentView = strings.Replace(contentView, "{{YOU-ARE--NOT-CONNECTED-VISIBILITY}}", "none", 1)
+		//TODO: Disable these 2 lines
+		contentView = strings.Replace(contentView, "{{ONLINE-VISIBILITY}}", "inline", 1)
+		contentView = strings.Replace(contentView, "{{OFFLINE-VISIBILITY}}", "none", 1)
+	} else if someoneIsConnected() {
+		contentView = strings.Replace(contentView, "{{YOU-ARE-CONNECTED-VISIBILITY}}", "none", 1)
+		contentView = strings.Replace(contentView, "{{YOU-ARE--NOT-CONNECTED-VISIBILITY}}", "inline", 1)
 		contentView = strings.Replace(contentView, "{{ONLINE-VISIBILITY}}", "inline", 1)
 		contentView = strings.Replace(contentView, "{{OFFLINE-VISIBILITY}}", "none", 1)
 	} else {
+		contentView = strings.Replace(contentView, "{{YOU-ARE-CONNECTED-VISIBILITY}}", "none", 1)
+		contentView = strings.Replace(contentView, "{{YOU-ARE--NOT-CONNECTED-VISIBILITY}}", "inline", 1)
 		contentView = strings.Replace(contentView, "{{ONLINE-VISIBILITY}}", "none", 1)
 		contentView = strings.Replace(contentView, "{{OFFLINE-VISIBILITY}}", "inline", 1)
 	}
+
 	footer, _ := os.ReadFile("./www/views/templates/footer.html")
 
 	io.WriteString(w, headerView+contentView+string(footer))
@@ -158,8 +191,11 @@ func loadAdmin(w http.ResponseWriter, r *http.Request) {
 	for _, techId := range techIds {
 		tech = getTechUsername(techId)
 		techItemView := string(techItem)
+		login, logout := getTechHistoric(techId)
 		techItemView = strings.Replace(techItemView, "{{TECH_ID}}", strconv.Itoa(techId), 2)
 		techItemView = strings.Replace(techItemView, "{{TECH_USERNAME}}", tech, 1)
+		techItemView = strings.Replace(techItemView, "{{TECH_LOGIN_TIME}}", login, 1)
+		techItemView = strings.Replace(techItemView, "{{TECH_LOGOUT_TIME}}", logout, 1)
 		allTechView += techItemView
 	}
 
@@ -353,6 +389,11 @@ func loadTech(w http.ResponseWriter, r *http.Request) {
 }
 
 func loadClient(w http.ResponseWriter, r *http.Request) {
+	if !someoneIsConnected() {
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
 	w.Header().Set("Content-Type", "text/html")
 	log.Println(r.URL)
 
@@ -373,6 +414,7 @@ func loadClient(w http.ResponseWriter, r *http.Request) {
 func loadLogout(w http.ResponseWriter, r *http.Request) {
 	var cookie *http.Cookie
 	var err error
+	now := time.Now()
 
 	cookie, err = r.Cookie("adminToken")
 	if err == nil {
@@ -413,7 +455,7 @@ func loadLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logoutUser(userId)
+	logoutUser(userId, now.Format("2006-01-02 15:04:05"))
 	sessionCookie := http.Cookie{Name: "techToken", Value: "", HttpOnly: true, MaxAge: -1}
 	http.SetCookie(w, &sessionCookie)
 
