@@ -1,0 +1,36 @@
+
+<div class="container text-center mt-5">
+    <div class="row">
+        <div class="col">
+            <h2>Client</h2>
+            <p>Vous avez besoin d'aide en informatique? Que ce soit pour un système du cégep ou votre ordinateur personnel, nous pouvons vous aider.</p>
+            <a class="btn btn-primary d-{{ONLINE-VISIBILITY}}" id="button_online" href="/client">Service en ligne</a>
+            <button class="btn btn-danger d-{{OFFLINE-VISIBILITY}}" id="button_offline" disabled>Service hors ligne</button>
+        </div>
+        <div class="col text-center">
+            <h2>Technicien</h2>
+            <p>Connectez-vous chers étudiants.</p>
+            <form method="post" class=" d-{{YOU-ARE--NOT-CONNECTED-VISIBILITY}}">
+                <div class="row mb-3">
+                    <label for="username" class="form-label col-3">Nom d'utilisateur</label>
+                    <div class="col-9">
+                        <input class="form-control" name="username" id="username"/>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="password" class="form-label col-3">Mot de passe</label>
+                    <div class="col-9">
+                        <input class="form-control" type="password" name="password" id="password"/>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-success d-inline">Se connecter</button>
+                </div>
+            </form>
+            <div class="d-{{YOU-ARE-CONNECTED-VISIBILITY}}">
+                <p>Vous êtes déjà connecté! Veuillez accéder au service pour supporter les clients! </p>
+                <a class="btn btn-success" href="/tech">Accéder au service</a>
+            </div>
+        </div>
+    </div>
+</div>

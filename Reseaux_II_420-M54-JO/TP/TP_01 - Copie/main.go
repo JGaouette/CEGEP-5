@@ -13,6 +13,14 @@ import (
 )
 
 func main() {
+	var chanClient = make(chan Message)
+	defer close(chanClient)
+
+	chanTechs := make(map[int]chan Message)
+	/*
+		var chanTech = make(chan Message)
+		defer close(chanTech)
+	*/
 	if !techExists("admin") {
 		createTech("admin", "admin", true)
 	}
@@ -20,15 +28,15 @@ func main() {
 		createTech("tech", "tech", false)
 	}
 
-	hub := newHub()
-	go hub.run()
-
 	//Init server
 	var addr = flag.String("addr", ":8080", "http service address")
 	flag.Parse()
 	http.HandleFunc("/", loadHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		userWs(w, r, hub)
+	http.HandleFunc("/clientWs", func(w http.ResponseWriter, r *http.Request) {
+		clientWs(w, r, chanTechs, chanClient)
+	})
+	http.HandleFunc("/techWs", func(w http.ResponseWriter, r *http.Request) {
+		techWs(w, r, chanTechs, chanClient)
 	})
 
 	http.HandleFunc("/client", loadClient)
@@ -118,7 +126,10 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 	content, _ := os.ReadFile("./www/views/home/home.html")
 	contentView := string(content)
 
-	cookie, _ := r.Cookie("techToken")
+	cookie, err := r.Cookie("techToken")
+	if err != nil {
+		log.Println("No tech token")
+	}
 
 	var cookieValue string
 
@@ -266,7 +277,7 @@ func loadEdit(w http.ResponseWriter, r *http.Request) {
 	queryId := r.URL.Query().Get("techId")
 
 	if queryId == "" {
-		log.Println("Trying to edit tech without providing ID")
+		log.Println("No techId provided")
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
@@ -330,7 +341,7 @@ func loadDelete(w http.ResponseWriter, r *http.Request) {
 	queryId := r.URL.Query().Get("techId")
 
 	if queryId == "" {
-		log.Println("Trying to delete tech without providing ID")
+		log.Println("No techId provided")
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
@@ -388,8 +399,8 @@ func loadClient(w http.ResponseWriter, r *http.Request) {
 
 	header, _ := os.ReadFile("./www/views/templates/header.html")
 	headerView := string(header)
-	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - User", 1)
-	headerView = strings.Replace(headerView, "{{H1}}", "User", 1)
+	headerView = strings.Replace(headerView, "{{TITLE}}", "TP1 - Client", 1)
+	headerView = strings.Replace(headerView, "{{H1}}", "Client", 1)
 	headerView = strings.Replace(headerView, "{{LOGOUT_VISIBILITY}}", "none", 1)
 	headerView = strings.Replace(headerView, "{{ERROR_VISIBILITY}}", "none", 1)
 	headerView = strings.Replace(headerView, "{{ERROR_TEXT}}", "", 1)

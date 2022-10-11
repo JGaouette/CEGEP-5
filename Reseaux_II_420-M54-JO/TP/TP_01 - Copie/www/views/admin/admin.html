@@ -1,0 +1,37 @@
+<div class="container">
+    <h3 class="d-inline mt-3">Ajouter un nouveau technicien</h3>
+    <a class="primary mx-2 " href="./admin/create" style="font-size: 1.8em;">
+        <i class="bi-plus-circle-fill"></i>
+    </a>
+</div>
+
+<ul class="list-group container mt-3">
+    <li class="list-group-item d-flex bg-primary">
+        <span class="col-4 my-auto text-light">Nom d'utilisateur</span>
+        <span class="col-4 my-auto text-light">Dernière connexion</span>
+        <span class="col-3 my-auto text-light">Dernière déconnexion</span>
+        <span class="col-1 my-auto text-light">Actions</span>
+    </li>
+
+    {{TECHS}}
+</ul>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attention</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text">Êtes vous sur de vouloir supprimer ce technicien du CAI ? Dans le cas échéant vous devrez lui donné 100%</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" onclick="toDelete()" name="supprimer" class="btn btn-danger">Supprimer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../assets/js/deleteModal.js"></script>

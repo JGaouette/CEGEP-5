@@ -1,13 +1,14 @@
-package main
+package later
 
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"tp_01"
 )
 
-func techWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Message, chanClient chan Message) {
+func techWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan main.Message, chanClient chan main.Message) {
 	var upgrader = websocket.Upgrader{}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -28,7 +29,7 @@ func techWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Messa
 	}
 
 	id := len(chanTechs) + 1
-	chanTechs[id] = make(chan Message)
+	chanTechs[id] = make(chan main.Message)
 
 	go write(conn, chanTechs[id], chanClose)
 
@@ -49,7 +50,7 @@ func techWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Messa
 	}
 }
 
-func clientWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Message, chanClient chan Message) {
+func clientWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan main.Message, chanClient chan main.Message) {
 	var upgrader = websocket.Upgrader{}
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -71,7 +72,7 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Mes
 	go write(conn, chanClient, chanClose)
 	for {
 		select {
-		case msg := <-chanTechs[-1]:
+		case msg := <-chanTechs[1]:
 			log.Println("Message received by tech: ", msg)
 			err := conn.WriteJSON(msg)
 			if err != nil {
@@ -80,14 +81,14 @@ func clientWs(w http.ResponseWriter, r *http.Request, chanTechs map[int]chan Mes
 			}
 
 		case <-chanClose:
-			log.Println("Client disconnected")
+			log.Println("User disconnected")
 			return
 		}
 	}
 }
 
-func write(conn *websocket.Conn, c chan Message, chanClose chan bool) {
-	var message Message
+func write(conn *websocket.Conn, c chan main.Message, chanClose chan bool) {
+	var message main.Message
 	defer func() { chanClose <- true }()
 	for {
 		msgType, msg, err := conn.ReadMessage()
