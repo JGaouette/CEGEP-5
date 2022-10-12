@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/gorilla/websocket"
 	"io"
 	"log"
 	"math/rand"
@@ -53,7 +54,33 @@ func main() {
 	}
 }
 
+func userWs(w http.ResponseWriter, r *http.Request, hub *Hub) {
+	upgrader := websocket.Upgrader{}
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return
+	}
+
+	user := &User{hub: hub, conn: conn, send: make(chan []byte, 256)}
+
+	cookie, err := r.Cookie("techToken")
+	if err != nil {
+		cookie = &http.Cookie{}
+	}
+
+	if isConnected(cookie.Value) {
+		user.hub.techLogin <- user
+	} else {
+		user.hub.clientLogin <- user
+	}
+
+	go user.write()
+	go user.read()
+}
+
 func loadHome(w http.ResponseWriter, r *http.Request) {
+	redirectTech(w, r)
+
 	now := time.Now()
 
 	log.Println(r.URL)
@@ -378,6 +405,8 @@ func loadTech(w http.ResponseWriter, r *http.Request) {
 }
 
 func loadClient(w http.ResponseWriter, r *http.Request) {
+	redirectTech(w, r)
+	
 	if !someoneIsConnected() {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
@@ -495,6 +524,19 @@ func redirect(w http.ResponseWriter, r *http.Request, needAdmin bool) {
 
 	if !isConnected {
 		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
+		return
+	}
+}
+
+func redirectTech(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("techToken")
+
+	if err != nil {
+		return
+	}
+
+	if isConnected(cookie.Value) {
+		http.Redirect(w, r, "/tech", http.StatusTemporaryRedirect)
 		return
 	}
 }

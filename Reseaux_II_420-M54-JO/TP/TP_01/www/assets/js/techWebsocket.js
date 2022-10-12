@@ -22,15 +22,11 @@ ws.onerror = function(e) {
 
 ws.onmessage = function(e) {
     let message = JSON.parse(e.data);
-    console.log("RESPONSE: " + e.data);
+    //console.log("RESPONSE: " + e.data);
 
     if (message.type === "Login") {
         createClient(message.id);
-         return;
-    }
-
-    if (!chats.has(message.clientID)) {
-        createClient(message.clientID);
+        return;
     }
 
     if (message.type === "Logout") {
@@ -50,7 +46,7 @@ document.getElementById("submit").onclick = function(e) {
         return false;
     }
     let input = document.getElementById("msg");
-    console.log("SEND: " + input.value);
+    //console.log("SEND: " + input.value);
 
     ws.send(JSON.stringify({
         techID: currentID,

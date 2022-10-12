@@ -13,7 +13,8 @@ ws.onclose = function() {
 }
 
 ws.onerror = function(e) {
-    console.log("ERROR: " + e.data);
+    //console.log("ERROR: " + e.data);
+    window.location.replace("http://127.0.0.1:8080/404");
 }
 
 ws.onmessage = function(e) {
@@ -22,6 +23,11 @@ ws.onmessage = function(e) {
 
     if (message.type === "Login") {
         ID = message.id;
+        return;
+    }
+
+    if (ID === "") {
+        error()
         return;
     }
 
@@ -50,3 +56,11 @@ document.getElementById("submit").onclick = function(e) {
 window.addEventListener("beforeunload", function (e) {
     ws.close();
 });
+
+function error() {
+    window.location.replace("http://127.0.0.1:8080/404");
+    /*
+    document.getElementById("submit").disabled = true;
+    document.getElementById("msg").disabled = true;
+     */
+}
