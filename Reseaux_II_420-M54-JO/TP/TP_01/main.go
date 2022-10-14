@@ -83,9 +83,8 @@ func loadHome(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()
 
-	log.Println(r.URL)
 	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
+		http.Redirect(w, r, "/404", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -406,7 +405,7 @@ func loadTech(w http.ResponseWriter, r *http.Request) {
 
 func loadClient(w http.ResponseWriter, r *http.Request) {
 	redirectTech(w, r)
-	
+
 	if !someoneIsConnected() {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return

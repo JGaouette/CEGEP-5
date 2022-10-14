@@ -6,23 +6,13 @@ const chats = new Map()
 const chatContainer = document.getElementById("chat-container")
 const clientContainer = document.getElementById("client-container")
 
-ws.onopen = function() {
-    console.log("OPEN");
-}
-
 ws.onclose = function() {
-    console.log("CLOSE");
     ws.close()
     ws = null;
 }
 
-ws.onerror = function(e) {
-    console.log("ERROR: " + e.data);
-}
-
 ws.onmessage = function(e) {
     let message = JSON.parse(e.data);
-    //console.log("RESPONSE: " + e.data);
 
     if (message.type === "Login") {
         createClient(message.id);
@@ -42,11 +32,9 @@ ws.onmessage = function(e) {
 document.getElementById("submit").onclick = function(e) {
     e.preventDefault();
     if (!ws) {
-        console.log("ERROR: No websocket connection");
         return false;
     }
     let input = document.getElementById("msg");
-    //console.log("SEND: " + input.value);
 
     ws.send(JSON.stringify({
         techID: currentID,
@@ -62,7 +50,6 @@ document.getElementById("submit").onclick = function(e) {
 window.addEventListener("beforeunload", function (e) {
     ws.close();
 });
-
 
 function createClient(id) {
     chatNumber++;
