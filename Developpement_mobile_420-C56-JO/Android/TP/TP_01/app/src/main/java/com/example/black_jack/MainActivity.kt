@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlin.math.round
@@ -29,10 +30,10 @@ class MainActivity : AppCompatActivity() {
         dealerLayout = findViewById(R.id.dealerLayout)
         playerLayout = findViewById(R.id.playerLayout)
 
-        //Declare a list of imageview
         btnHit.setOnClickListener {
             val carte = ImageView(this)
-            carte.setImageBitmap(getCard("2","Coeur"))
+            //carte.setImageBitmap(getCard("2","Coeur"))
+            carte.setImageBitmap(getRandomCard())
             addCardToLayout(playerLayout, carte)
             playerCards++
         }
@@ -48,9 +49,33 @@ class MainActivity : AppCompatActivity() {
             playerCards
         }
 
-        card.x = -((layout.width + cardNumber * 50) / 3).toFloat()
-        card.y = 0f
+        card.x = -((layout.width - cardNumber * 150) / 3).toFloat()
+        card.y = 0f - (cardNumber * 27.0 * 2).toFloat()
+
         layout.addView(card)
+
+        //Show card y with toast
+        Toast.makeText(this, "Card Y: ${card.y}", Toast.LENGTH_SHORT).show()
+
+    }
+
+    private fun getRandomCard(): Bitmap {
+        val col: Int = (1..13).random()
+        val row: Int = (1..4).random()
+        val offset: Int = when (col) {
+            1 -> 0
+            else -> 1
+        }
+
+        val width = 192
+        val height = 27.0
+        return Bitmap.createBitmap(
+            (jeuCarte.drawable as BitmapDrawable).bitmap,
+            (col - 1) * width + offset,
+            round((row - 1) * height).toInt(),
+            width,
+            round(height).toInt()
+        )
     }
 
     private fun getCard(rank: String, suit: String): Bitmap {
