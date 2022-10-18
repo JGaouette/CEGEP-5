@@ -34,13 +34,9 @@ public:
         glGenTextures(1, &id);
         glBindTexture(GL_TEXTURE_2D, id);
 
-        #ifdef __APPLE__
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
-                                        0, GL_BGRA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
-        #else
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
-                                        0, GL_RGBA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
-        #endif
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
+                                    0, GL_RGBA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
+
  
         SDL_FreeSurface(sdlSurface);
         
@@ -57,8 +53,13 @@ public:
         width = sdlSurface->w;
         height = sdlSurface->h;
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
-                                    0, GL_BGRA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
+        #ifdef __APPLE__
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
+                                        0, GL_BGRA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
+        #else
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sdlSurface->w, sdlSurface->h, 
+                                        0, GL_RGBA, GL_UNSIGNED_BYTE, sdlSurface->pixels);
+        #endif
  
         SDL_FreeSurface(sdlSurface);
         

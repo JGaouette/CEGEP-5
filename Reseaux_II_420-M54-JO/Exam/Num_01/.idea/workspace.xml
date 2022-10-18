@@ -4,15 +4,22 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="95ad2bb4-95ab-4b54-a432-b757f75b87f2" name="Changes" comment="">
+    <list default="true" id="e6dd5867-c018-422b-a57d-854f3757fdad" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../../../Base_de_donnees_II_420-B56-JO/Ateliers/Atelier_03/Atelier_03.accdb" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Base_de_donnees_II_420-B56-JO/Ateliers/Atelier_03/Atelier_03.accdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../Developpement_de_jeux_video_420-G56-JO/Projet/Partie_03_(Texturisation)/Texture.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Developpement_de_jeux_video_420-G56-JO/Projet/Partie_03_(Texturisation)/Texture.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Note_de_cours/05_Test_Unitaire/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Note_de_cours/05_Test_Unitaire/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
   </component>
   <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../../../Program Files/Go" />
   <component name="Git.Settings">
@@ -21,7 +28,7 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectId" id="2EfVLqr5WrvqUMH5uD75rPTwyh1" />
+  <component name="ProjectId" id="2G5FDD3IwM5hbT5l6IshvW5LRiz" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -29,6 +36,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
@@ -39,9 +47,36 @@
     "WebServerToolWindowFactoryState": "false",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "C:/Users/2074857"
+    "last_opened_file_path": "C:/Users/2074857/Desktop/CEGEP-5/Reseaux_II_420-M54-JO/Exam/Num_01/main.go"
   }
 }]]></component>
+  <component name="RunManager" selected="Go Build.go build main.go">
+    <configuration name="go build Num_01" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+      <module name="Num_01" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/../Num_01|$PROJECT_DIR$/main.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="Num_01" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/main.go" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Go Build.go build Num_01" />
+      <item itemvalue="Go Build.go build main.go" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build main.go" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />

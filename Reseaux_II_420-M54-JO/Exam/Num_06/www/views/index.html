@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <title>Numéro 6</title>
+</head>
+<body class="m-5">
+    <h1>Numéro 6</h1>
+    <form>
+        <div class="mb-3">
+            <label for="nb" class="form-label col-3">Nombre à doubler</label>
+            <div class="col-9">
+                <input class="form-control" type="number" name="nb" id="nb"/>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-success d-inline" id="submit">Soumettre</button>
+        </div>
+    </form>
+</body>
+<script>
+    let ws = new WebSocket("ws://127.0.0.1:8080/ws");
+
+    ws.onopen = function() {
+        console.log("OPEN");
+    }
+
+    ws.onclose = function() {
+        console.log("CLOSE");
+        ws.close()
+        ws = null;
+    }
+
+    ws.onerror = function(e) {
+        console.log("ERROR: " + e.data);
+    }
+
+    ws.onmessage = function(e) {
+        console.log("RESPONSE: " + e.data);
+        document.getElementById("nb").value = e.data;
+    }
+
+    document.getElementById("submit").onclick = function(e) {
+        e.preventDefault();
+        console.log("SENDING: " + document.getElementById("nb").value);
+        let nb = document.getElementById("nb").value;
+        ws.send(nb);
+    }
+</script>
+</html>

@@ -8,43 +8,60 @@
     android:background="#349138"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/dealerLayout"
+    <HorizontalScrollView
+        android:id="@+id/dealerScrollView"
         android:layout_width="0dp"
         android:layout_height="260dp"
-        android:layout_marginStart="130dp"
         android:layout_marginTop="80dp"
-        android:layout_marginEnd="130dp"
         android:background="#5AB65F"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintBottom_toTopOf="@+id/btnHit"
+        app:layout_constraintEnd_toEndOf="@+id/playerScrollView"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/playerScrollView"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpeakableTextPresentCheck">
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/dealerLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#5AB65F"
+            android:orientation="horizontal">
 
-    <LinearLayout
-        android:id="@+id/playerLayout"
-        android:layout_width="0dp"
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <HorizontalScrollView
+
+        android:id="@+id/playerScrollView"
+        android:layout_width="match_parent"
         android:layout_height="260dp"
         android:layout_marginStart="130dp"
         android:layout_marginEnd="130dp"
         android:layout_marginBottom="80dp"
         android:background="#5AB65F"
-        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="SpeakableTextPresentCheck">
+
+        <LinearLayout
+            android:id="@+id/playerLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
 
     <Button
         android:id="@+id/btnHit"
         android:layout_width="161dp"
         android:layout_height="81dp"
+        android:layout_marginStart="8dp"
         android:text="@string/main_btnHit_text"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/playerLayout"
-        app:layout_constraintStart_toStartOf="@+id/dealerLayout"
-        app:layout_constraintTop_toBottomOf="@+id/dealerLayout" />
+        app:layout_constraintBottom_toTopOf="@+id/playerScrollView"
+        app:layout_constraintStart_toStartOf="@+id/playerScrollView"
+        app:layout_constraintTop_toBottomOf="@+id/dealerScrollView" />
 
     <Button
         android:id="@+id/btnStand"
@@ -52,9 +69,9 @@
         android:layout_height="81dp"
         android:text="@string/main_btnStand_text"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/playerLayout"
-        app:layout_constraintEnd_toEndOf="@+id/dealerLayout"
-        app:layout_constraintTop_toBottomOf="@+id/dealerLayout" />
+        app:layout_constraintBottom_toTopOf="@+id/playerScrollView"
+        app:layout_constraintEnd_toEndOf="@+id/playerScrollView"
+        app:layout_constraintTop_toBottomOf="@+id/dealerScrollView" />
 
     <TextView
         android:id="@+id/txtBet"
@@ -66,9 +83,9 @@
         android:textColor="#263238"
         android:textSize="60sp"
         android:typeface="normal"
-        app:layout_constraintBottom_toTopOf="@+id/playerLayout"
+        app:layout_constraintBottom_toTopOf="@+id/playerScrollView"
         app:layout_constraintEnd_toStartOf="@+id/btnStand"
         app:layout_constraintStart_toEndOf="@+id/btnHit"
-        app:layout_constraintTop_toBottomOf="@+id/dealerLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/dealerScrollView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
