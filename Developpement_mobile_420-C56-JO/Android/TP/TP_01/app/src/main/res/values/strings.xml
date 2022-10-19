@@ -3,4 +3,9 @@
     <string name="main_btnHit_text">Hit!</string>
     <string name="main_btnStand_text">Stand</string>
     <string name="main_txtBet_text">$000</string>
+    <string name="main_btnBank_text">Bank (100$)</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="main_txtDealerCount">0</string>
+    <string name="main_txtPlayerCount">0</string>
 </resources>
