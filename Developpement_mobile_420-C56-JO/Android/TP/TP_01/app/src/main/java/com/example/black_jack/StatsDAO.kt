@@ -10,4 +10,7 @@ interface StatsDAO {
 
     @Update
     fun updateStats(stats: Stats)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun resetStats(stats: List<Stats>)
 }

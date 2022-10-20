@@ -8,6 +8,15 @@
     android:background="#349138"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/btnStats"
+        android:layout_width="49dp"
+        android:layout_height="105dp"
+        android:layout_marginTop="16dp"
+        android:text="Stats"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <HorizontalScrollView
         android:id="@+id/dealerScrollView"
         android:layout_width="0dp"
@@ -35,7 +44,6 @@
     </HorizontalScrollView>
 
     <HorizontalScrollView
-
         android:id="@+id/playerScrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -119,5 +127,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/dealerScrollView"
         app:layout_constraintTop_toTopOf="@+id/playerScrollView" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/statsContainer"
+        android:name="com.example.black_jack.StatsFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:translationZ="10dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/betContainer"
+        android:name="com.example.black_jack.BankFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="4:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,7 +5,9 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import kotlin.math.round
 
 
@@ -23,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
         val btnHit = findViewById<Button>(R.id.btnHit)
         val btnStand = findViewById<Button>(R.id.btnStand)
+        val btnStats = findViewById<Button>(R.id.btnStats)
 
         cardDeckImage = ImageView(this)
         cardDeckImage.setImageResource(R.drawable.jeu_carte)
@@ -32,6 +35,8 @@ class MainActivity : AppCompatActivity() {
         dealerLayout = findViewById(R.id.dealerLayout)
         playerLayout = findViewById(R.id.playerLayout)
         scrollLayout = findViewById(R.id.playerLayout)
+
+        viewModel.resetStats()
 
         viewModel.getDeck().observe(this){ deck ->
             Toast.makeText(this, "Deck id: ${deck.deckId}", Toast.LENGTH_SHORT).show()
@@ -60,18 +65,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             btnStand.setOnClickListener {
-                updateDealerHand(true)
-                updateDealerCount()
+                stand(deck)
+                result()
 
-                while (viewModel.getDealerValue() < 17) {
-                    viewModel.drawCard(deck.deckId).observe(this){ card ->
-                        viewModel.addDealerCard(card)
-                        updateDealerHand()
-                        updateDealerCount()
-                    }
-                }
-
-                Toast.makeText(this, "Dealer has finished drawing cards", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -81,8 +77,10 @@ class MainActivity : AppCompatActivity() {
 
             if (viewModel.getPlayerValue() > 21) {
                 Toast.makeText(this, "Player lose", Toast.LENGTH_SHORT).show()
+                /*
                 btnHit.isEnabled = false
                 btnStand.isEnabled = false
+                */
             }
         }
 
@@ -92,10 +90,48 @@ class MainActivity : AppCompatActivity() {
 
             if (viewModel.getDealerValue() > 21) {
                 Toast.makeText(this, "Player win", Toast.LENGTH_SHORT).show()
-                btnHit.isEnabled = false
-                btnStand.isEnabled = false
             }
         }
+
+        btnStats.setOnClickListener {
+            //viewModel.setStatsVisible(true)
+            //create a list with viewModel.getStats()
+            val stats : List<Stats> = viewModel.getAllStats()
+
+            Toast.makeText(this, "Stats are visible", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun result(){
+        updateDealerHand(true)
+        updateDealerCount()
+
+        if (viewModel.getPlayerValue() > viewModel.getDealerValue()) {
+            Toast.makeText(this, "Player win", Toast.LENGTH_SHORT).show()
+        } else if (viewModel.getPlayerValue() < viewModel.getDealerValue()) {
+            Toast.makeText(this, "Player lose", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Draw", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun stand(deck: Deck){
+        updateDealerHand(true)
+        updateDealerCount()
+
+        if (viewModel.getDealerValue() < 17 || viewModel.getDealerValue() < viewModel.getPlayerValue()) {
+            viewModel.drawCard(deck.deckId).observe(this){ card ->
+                viewModel.addDealerCard(card)
+                updateDealerHand()
+                updateDealerCount()
+
+                if (viewModel.getDealerValue() < 17 || viewModel.getDealerValue() < viewModel.getPlayerValue()) {
+                    stand(deck)
+                }
+            }
+        }
+
+        Toast.makeText(this, "Dealer has finished drawing cards", Toast.LENGTH_SHORT).show()
     }
 
     private fun updatePlayerHand(){

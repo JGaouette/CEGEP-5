@@ -6,11 +6,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val deckRepo = DeckRepo()
-    private val cardRepo = CardRepo()
+    private val repo = Repository()
 
     private val playerHand = MutableLiveData<List<Card>>()
     private val dealerHand = MutableLiveData<List<Card>>()
+
+    private val betIsVisible = MutableLiveData<Boolean>()
+    private val statsIsVisible = MutableLiveData<Boolean>()
+
+    private val statsDAO = StatsDatabase.getDatabase(application).statsDAO()
 
     init {
         playerHand.value = listOf()
@@ -23,13 +27,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getPlayerHand() = playerHand as LiveData<List<Card>>
     fun getDealerHand() = dealerHand as LiveData<List<Card>>
 
+    fun betIsVisible() = betIsVisible as LiveData<Boolean>
+    fun statsIsVisible() = statsIsVisible as LiveData<Boolean>
+
+    fun setBetVisibile(isVisible: Boolean) { betIsVisible.value = isVisible }
+
+    fun setStatsVisible(isVisible: Boolean) {statsIsVisible.value = isVisible }
+
     fun getDeck() = liveData(Dispatchers.IO) {
-        val response = deckRepo.getDeck()
+        val response = repo.getDeck()
         emit(response)
     }
 
     fun drawCard(deckId: Int) = liveData(Dispatchers.IO) {
-        val result = cardRepo.getCard(deckId)
+        val result = repo.getCard(deckId)
+        removeStats(result.rank)
         emit(result)
     }
 
@@ -81,13 +93,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         playerHand.value = listOf()
         dealerHand.value = listOf()
     }
-/*
-    private val statsDAO = StatsDatabase.getDatabase(application).statsDAO()
 
     val stats : LiveData<List<Stats>> = statsDAO.getStats()
 
-    //Remove one number of the chosen type of Stats from the database
-    fun removeStats(type: String) {
+    fun resetStats() = viewModelScope.launch {
+        statsDAO.resetStats(listOf(
+            Stats(1, "As", 28),
+            Stats(2, "10", 112),
+            Stats(3, "2", 28),
+            Stats(4, "3", 28),
+            Stats(5, "4", 28),
+            Stats(6, "5", 28),
+            Stats(7, "6", 28),
+            Stats(8, "7", 28),
+            Stats(9, "8", 28),
+            Stats(10, "9", 28))
+        )
+    }
+
+    private fun removeStats(type: String) {
         viewModelScope.launch {
             val stats = statsDAO.getStats().value
             if (stats != null) {
@@ -101,5 +125,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
-    }*/
+    }
+
+    fun getAllStats() : List<Stats> {
+        return statsDAO.getStats().value ?: listOf()
+    }
 }

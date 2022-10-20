@@ -8,4 +8,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="main_txtDealerCount">0</string>
     <string name="main_txtPlayerCount">0</string>
+    <string name="bank_txtBetAmountText">Please, give your money money !!</string>
+    <string name="stats_txtRank_text">Rank</string>
 </resources>
