@@ -8,5 +8,5 @@ import androidx.room.PrimaryKey
 data class Stats (
     @PrimaryKey val ID : Long,
     @ColumnInfo(name="Type") val type : String,
-    @ColumnInfo(name="Number") val number : Int
+    @ColumnInfo(name="Number") val number : Int,
 )

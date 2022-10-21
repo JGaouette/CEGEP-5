@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val repo = Repository()
@@ -15,11 +16,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val statsIsVisible = MutableLiveData<Boolean>()
 
     private val statsDAO = StatsDatabase.getDatabase(application).statsDAO()
+    private val remainingCards = MutableLiveData<Int>()
 
     init {
         playerHand.value = listOf()
         dealerHand.value = listOf()
     }
+
+    /**** Game ****/
 
     fun getPlayerCardCount() = playerHand.value?.size ?: 0
     fun getDealerCardCount() = playerHand.value?.size ?: 0
@@ -41,7 +45,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun drawCard(deckId: Int) = liveData(Dispatchers.IO) {
         val result = repo.getCard(deckId)
-        removeStats(result.rank)
+
+        if (result.rank == "Roi" || result.rank == "Dame" || result.rank == "Valet") {
+            statsDAO.removeOneStat("10")
+        } else {
+            statsDAO.removeOneStat(result.rank)
+        }
+
+        withContext(Dispatchers.Main) {
+            remainingCards.value = statsDAO.getRemainingCards()
+        }
+
         emit(result)
     }
 
@@ -94,40 +108,46 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         dealerHand.value = listOf()
     }
 
-    val stats : LiveData<List<Stats>> = statsDAO.getStats()
+    /**** Database ****/
 
-    fun resetStats() = viewModelScope.launch {
-        statsDAO.resetStats(listOf(
-            Stats(1, "As", 28),
-            Stats(2, "10", 112),
-            Stats(3, "2", 28),
-            Stats(4, "3", 28),
-            Stats(5, "4", 28),
-            Stats(6, "5", 28),
-            Stats(7, "6", 28),
-            Stats(8, "7", 28),
-            Stats(9, "8", 28),
-            Stats(10, "9", 28))
-        )
+    fun initDatabase() = viewModelScope.launch {
+        statsDAO.resetStats()
+
+        statsDAO.insertStats(Stats(1, "As", 28))
+        statsDAO.insertStats(Stats(2, "10", 112))
+        statsDAO.insertStats(Stats(3, "9", 28))
+        statsDAO.insertStats(Stats(4, "8", 28))
+        statsDAO.insertStats(Stats(5, "7", 28))
+        statsDAO.insertStats(Stats(6, "6", 28))
+        statsDAO.insertStats(Stats(7, "5", 28))
+        statsDAO.insertStats(Stats(8, "4", 28))
+        statsDAO.insertStats(Stats(9, "3", 28))
+        statsDAO.insertStats(Stats(10, "2", 28))
     }
 
-    private fun removeStats(type: String) {
-        viewModelScope.launch {
-            val stats = statsDAO.getStats().value
-            if (stats != null) {
-                for (stat in stats) {
-                    if (stat.type == type) {
-                        if (stat.number > 0) {
-                            statsDAO.updateStats(Stats(stat.ID, stat.type, stat.number - 1))
-                        }
-                        break
-                    }
-                }
-            }
-        }
-    }
+    fun getStatNumber(type: String) = statsDAO.getStatNumber(type)
+
+    fun getRemainingCards() = remainingCards as LiveData<Int>
 
     fun getAllStats() : List<Stats> {
         return statsDAO.getStats().value ?: listOf()
+    }
+
+    /**** Bank ****/
+    val bank = MutableLiveData<Int>()
+    val bet = MutableLiveData<Int>()
+    var inGame = MutableLiveData<Boolean>()
+
+    fun initGame() {
+        bank.value = 100
+        inGame.value = false
+    }
+
+    fun indebtedForLife() {
+        bank.value = bank.value?.plus(100)
+    }
+
+    fun sendBet(value: Int) {
+        bet.value = value
     }
 }

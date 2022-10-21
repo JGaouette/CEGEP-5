@@ -1,5 +1,6 @@
 package com.example.black_jack
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
@@ -18,14 +19,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dealerLayout: LinearLayout
     private lateinit var playerLayout: LinearLayout
     private lateinit var scrollLayout: LinearLayout
+    private lateinit var btnHit: Button
+    private lateinit var btnStand: Button
 
+    @SuppressLint("SetTextI18n", "CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val btnHit = findViewById<Button>(R.id.btnHit)
-        val btnStand = findViewById<Button>(R.id.btnStand)
         val btnStats = findViewById<Button>(R.id.btnStats)
+        btnHit = findViewById(R.id.btnHit)
+        btnStand = findViewById(R.id.btnStand)
 
         cardDeckImage = ImageView(this)
         cardDeckImage.setImageResource(R.drawable.jeu_carte)
@@ -36,38 +40,41 @@ class MainActivity : AppCompatActivity() {
         playerLayout = findViewById(R.id.playerLayout)
         scrollLayout = findViewById(R.id.playerLayout)
 
-        viewModel.resetStats()
+        viewModel.initDatabase()
+        viewModel.initGame()
+        btnHit.isEnabled = false
+        btnStand.isEnabled = false
 
         viewModel.getDeck().observe(this){ deck ->
             Toast.makeText(this, "Deck id: ${deck.deckId}", Toast.LENGTH_SHORT).show()
 
-            viewModel.drawCard(deck.deckId).observe(this){ card ->
-                viewModel.addPlayerCard(card)
-            }
+            viewModel.bank.value?.let { it1 -> BankDialog.newInstance("Blackjack start, please bet", it1).show(supportFragmentManager, "bankDialog") }
 
-            viewModel.drawCard(deck.deckId).observe(this){ card ->
-                card.hidden = true
-                viewModel.addDealerCard(card)
-            }
-
-            viewModel.drawCard(deck.deckId).observe(this){ card ->
-                viewModel.addPlayerCard(card)
-            }
-
-            viewModel.drawCard(deck.deckId).observe(this){ card ->
-                viewModel.addDealerCard(card)
+            viewModel.inGame.observe(this){ inGame ->
+                if (inGame) start(deck)
+                else {
+                    btnHit.isEnabled = false
+                    btnStand.isEnabled = false
+                }
             }
 
             btnHit.setOnClickListener {
+                btnHit.isEnabled = false
+                btnStand.isEnabled = false
+
                 viewModel.drawCard(deck.deckId).observe(this){ card ->
                     viewModel.addPlayerCard(card)
+                    btnHit.isEnabled = true
+                    btnStand.isEnabled = true
                 }
             }
 
             btnStand.setOnClickListener {
-                stand(deck)
-                result()
+                btnHit.isEnabled = false
+                btnStand.isEnabled = false
 
+                stand(deck)
+                result(true)
             }
         }
 
@@ -75,43 +82,83 @@ class MainActivity : AppCompatActivity() {
             updatePlayerHand()
             updatePlayerCount()
 
-            if (viewModel.getPlayerValue() > 21) {
-                Toast.makeText(this, "Player lose", Toast.LENGTH_SHORT).show()
-                /*
-                btnHit.isEnabled = false
-                btnStand.isEnabled = false
-                */
-            }
+            result()
         }
 
         viewModel.getDealerHand().observe(this){
             updateDealerHand()
             updateDealerCount()
 
-            if (viewModel.getDealerValue() > 21) {
-                Toast.makeText(this, "Player win", Toast.LENGTH_SHORT).show()
-            }
+            result()
         }
 
         btnStats.setOnClickListener {
-            //viewModel.setStatsVisible(true)
-            //create a list with viewModel.getStats()
-            val stats : List<Stats> = viewModel.getAllStats()
+            viewModel.setStatsVisible(true)
+        }
 
-            Toast.makeText(this, "Stats are visible", Toast.LENGTH_SHORT).show()
+        viewModel.bet.observe(this){
+            findViewById<TextView>(R.id.txtBet).text = "$$it"
+            Toast.makeText(this, "Bet: $it", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun result(){
-        updateDealerHand(true)
-        updateDealerCount()
+    private fun start(deck: Deck) {
+        viewModel.resetHands()
+        btnHit.isEnabled = false
+        btnStand.isEnabled = false
 
-        if (viewModel.getPlayerValue() > viewModel.getDealerValue()) {
-            Toast.makeText(this, "Player win", Toast.LENGTH_SHORT).show()
-        } else if (viewModel.getPlayerValue() < viewModel.getDealerValue()) {
-            Toast.makeText(this, "Player lose", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Draw", Toast.LENGTH_SHORT).show()
+        viewModel.drawCard(deck.deckId).observe(this){ card ->
+            viewModel.addPlayerCard(card)
+        }
+
+        viewModel.drawCard(deck.deckId).observe(this){ card ->
+            card.hidden = true
+            viewModel.addDealerCard(card)
+        }
+
+        viewModel.drawCard(deck.deckId).observe(this){ card ->
+            viewModel.addPlayerCard(card)
+        }
+
+        viewModel.drawCard(deck.deckId).observe(this){ card ->
+            viewModel.addDealerCard(card)
+            btnHit.isEnabled = true
+            btnStand.isEnabled = true
+        }
+    }
+
+    private fun result(hasStand: Boolean = false){
+        if (viewModel.inGame.value == false) return
+
+        if (viewModel.getPlayerValue() > 21){
+            updateDealerHand(true)
+            updateDealerCount()
+            viewModel.inGame.value = false
+            viewModel.bank.value = viewModel.bank.value?.minus(viewModel.bet.value!!)
+            viewModel.bank.value?.let { bank -> BankDialog.newInstance("You've lost, you're over 21", bank).show(supportFragmentManager, "bankDialog") }
+            return
+        }
+
+        else if (hasStand){
+            if (viewModel.getPlayerValue() < viewModel.getDealerValue()){
+                viewModel.inGame.value = false
+                viewModel.bank.value = viewModel.bank.value?.minus(viewModel.bet.value!!)
+                viewModel.bank.value?.let { bank -> BankDialog.newInstance("You've lost, dealer is over you", bank).show(supportFragmentManager, "bankDialog") }
+                return
+            }
+
+            else if (viewModel.getPlayerValue() == viewModel.getDealerValue()){
+                viewModel.inGame.value = false
+                viewModel.bank.value?.let { bank -> BankDialog.newInstance("Draw, you're equal to dealer", bank).show(supportFragmentManager, "bankDialog") }
+                return
+            }
+        }
+
+        if (viewModel.getDealerValue() > 21){
+            viewModel.inGame.value = false
+            viewModel.bank.value = viewModel.bank.value?.plus(viewModel.bet.value!!)
+            viewModel.bank.value?.let { bank -> BankDialog.newInstance("You've won, dealer is over 21", bank).show(supportFragmentManager, "bankDialog") }
+            return
         }
     }
 
@@ -131,7 +178,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        Toast.makeText(this, "Dealer has finished drawing cards", Toast.LENGTH_SHORT).show()
+        result(true)
     }
 
     private fun updatePlayerHand(){
