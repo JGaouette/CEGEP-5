@@ -13,6 +13,7 @@ import androidx.fragment.app.activityViewModels
 
 class BankDialog : DialogFragment() {
     private val viewModel: MainViewModel by activityViewModels()
+    private val bet = 0
 
     companion object {
         private const val KEY_TITLE = "KEY_TITLE"
@@ -26,7 +27,6 @@ class BankDialog : DialogFragment() {
             fragment.arguments = args
             return fragment
         }
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -58,10 +58,11 @@ class BankDialog : DialogFragment() {
 
 
     override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
+        super.onDismiss(dialog)/*
          if(viewModel.inGame.value == false) {
              newInstance("Do not quit without reason!", viewModel.bank.value!!).show(parentFragmentManager, "bankDialog")
-         }
+         }*/
+        viewModel.inGame.value = true
     }
 
     @SuppressLint("SetTextI18n")
@@ -86,7 +87,6 @@ class BankDialog : DialogFragment() {
             }
 
             viewModel.sendBet(bet)
-            viewModel.inGame.value = true
             dismiss()
         }
 

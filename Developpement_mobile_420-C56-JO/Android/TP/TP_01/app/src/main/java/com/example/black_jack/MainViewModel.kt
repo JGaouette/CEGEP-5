@@ -31,10 +31,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun getPlayerHand() = playerHand as LiveData<List<Card>>
     fun getDealerHand() = dealerHand as LiveData<List<Card>>
 
-    fun betIsVisible() = betIsVisible as LiveData<Boolean>
     fun statsIsVisible() = statsIsVisible as LiveData<Boolean>
-
-    fun setBetVisibile(isVisible: Boolean) { betIsVisible.value = isVisible }
 
     fun setStatsVisible(isVisible: Boolean) {statsIsVisible.value = isVisible }
 
@@ -45,12 +42,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun drawCard(deckId: Int) = liveData(Dispatchers.IO) {
         val result = repo.getCard(deckId)
-
-        if (result.rank == "Roi" || result.rank == "Dame" || result.rank == "Valet") {
-            statsDAO.removeOneStat("10")
-        } else {
-            statsDAO.removeOneStat(result.rank)
-        }
 
         withContext(Dispatchers.Main) {
             remainingCards.value = statsDAO.getRemainingCards()
@@ -129,8 +120,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getRemainingCards() = remainingCards as LiveData<Int>
 
-    fun getAllStats() : List<Stats> {
-        return statsDAO.getStats().value ?: listOf()
+    fun removeOneStat(rank: String) = viewModelScope.launch {
+        if (rank == "Roi" || rank == "Dame" || rank == "Valet") {
+            statsDAO.removeOneStat("10")
+        } else {
+            statsDAO.removeOneStat(rank)
+        }
     }
 
     /**** Bank ****/
@@ -140,6 +135,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun initGame() {
         bank.value = 100
+        bet.value = 0
         inGame.value = false
     }
 

@@ -6,11 +6,8 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
 import kotlin.math.round
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var cardDeckImage: ImageView
@@ -48,7 +45,9 @@ class MainActivity : AppCompatActivity() {
         viewModel.getDeck().observe(this){ deck ->
             Toast.makeText(this, "Deck id: ${deck.deckId}", Toast.LENGTH_SHORT).show()
 
-            viewModel.bank.value?.let { it1 -> BankDialog.newInstance("Blackjack start, please bet", it1).show(supportFragmentManager, "bankDialog") }
+            viewModel.bank.value?.let { it1 ->
+                BankDialog.newInstance("Blackjack start, please bet", it1).show(supportFragmentManager, "bankDialog")
+            }
 
             viewModel.inGame.observe(this){ inGame ->
                 if (inGame) start(deck)
@@ -107,28 +106,52 @@ class MainActivity : AppCompatActivity() {
         btnHit.isEnabled = false
         btnStand.isEnabled = false
 
-        viewModel.drawCard(deck.deckId).observe(this){ card ->
-            viewModel.addPlayerCard(card)
-        }
+        viewModel.drawCard(deck.deckId).observe(this){ card1 ->
+            viewModel.addPlayerCard(card1)
+            viewModel.removeOneStat(card1.rank)
 
-        viewModel.drawCard(deck.deckId).observe(this){ card ->
-            card.hidden = true
-            viewModel.addDealerCard(card)
-        }
+            viewModel.drawCard(deck.deckId).observe(this){ card2 ->
+                card2.hidden = true
+                viewModel.addDealerCard(card2)
+                viewModel.removeOneStat(card2.rank)
 
-        viewModel.drawCard(deck.deckId).observe(this){ card ->
-            viewModel.addPlayerCard(card)
-        }
+                viewModel.drawCard(deck.deckId).observe(this){ card3 ->
+                    viewModel.addPlayerCard(card3)
+                    viewModel.removeOneStat(card3.rank)
 
-        viewModel.drawCard(deck.deckId).observe(this){ card ->
-            viewModel.addDealerCard(card)
-            btnHit.isEnabled = true
-            btnStand.isEnabled = true
+                    viewModel.drawCard(deck.deckId).observe(this){ card4 ->
+                        viewModel.addDealerCard(card4)
+                        viewModel.removeOneStat(card4.rank)
+
+                        if (viewModel.getPlayerValue() == 21){
+                            updateDealerHand(true)
+                            updateDealerCount()
+                            result(true)
+                        }
+
+                        btnHit.isEnabled = true
+                        btnStand.isEnabled = true
+                    }
+                }
+            }
         }
     }
 
     private fun result(hasStand: Boolean = false){
         if (viewModel.inGame.value == false) return
+
+        if (viewModel.getPlayerValue() == 21 && viewModel.getPlayerHand().value?.size == 2 && hasStand){
+            if (viewModel.getDealerValue() != 21 && viewModel.getDealerHand().value?.size == 2){
+                viewModel.inGame.value = false
+                viewModel.bank.value = viewModel.bank.value?.plus(viewModel.bet.value!!)
+                viewModel.bank.value?.let { bank -> BankDialog.newInstance("Black Jack!", bank).show(supportFragmentManager, "bankDialog") }
+                return
+            } else {
+                viewModel.inGame.value = false
+                viewModel.bank.value?.let { bank -> BankDialog.newInstance("Draw ! So sad after a Black Jack...", bank).show(supportFragmentManager, "bankDialog") }
+                return
+            }
+        }
 
         if (viewModel.getPlayerValue() > 21){
             updateDealerHand(true)
@@ -154,7 +177,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        if (viewModel.getDealerValue() > 21){
+        else if (viewModel.getDealerValue() > 21){
             viewModel.inGame.value = false
             viewModel.bank.value = viewModel.bank.value?.plus(viewModel.bet.value!!)
             viewModel.bank.value?.let { bank -> BankDialog.newInstance("You've won, dealer is over 21", bank).show(supportFragmentManager, "bankDialog") }
@@ -176,9 +199,9 @@ class MainActivity : AppCompatActivity() {
                     stand(deck)
                 }
             }
+        } else {
+            result(true)
         }
-
-        result(true)
     }
 
     private fun updatePlayerHand(){
@@ -191,7 +214,10 @@ class MainActivity : AppCompatActivity() {
     private fun updateDealerHand(reveal : Boolean = false){
         dealerLayout.removeAllViews()
         viewModel.getDealerHand().value?.forEach{ card ->
-            if (reveal && card.hidden) card.hidden = false
+            if (reveal && card.hidden){
+                card.hidden = false
+                viewModel.removeOneStat(card.rank)
+            }
 
             addCardToLayout(dealerLayout, card)
         }
@@ -217,13 +243,7 @@ class MainActivity : AppCompatActivity() {
             cardImage.setImageBitmap(getCardImage(card))
         }
 
-        val cardNumber: Int = if(layout.id == dealerLayout.id){
-            viewModel.getDealerCardCount()
-        }else{
-            viewModel.getPlayerCardCount()
-        }
-
-        cardImage.x = 0f /* - (cardNumber * 30f) */
+        cardImage.x = 0f
         cardImage.y = 0f
 
         layout.addView(cardImage)
