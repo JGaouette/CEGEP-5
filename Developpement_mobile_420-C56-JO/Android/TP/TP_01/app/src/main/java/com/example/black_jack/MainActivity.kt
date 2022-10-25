@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
                 btnStand.isEnabled = false
 
                 stand(deck)
-                result(true)
+                //result(true)
             }
         }
 
@@ -88,7 +88,12 @@ class MainActivity : AppCompatActivity() {
             updateDealerHand()
             updateDealerCount()
 
-            result()
+            if (viewModel.getDealerHand().value?.size!! < 3){
+                result()
+            }
+            else{
+                result(true)
+            }
         }
 
         btnStats.setOnClickListener {
@@ -140,6 +145,9 @@ class MainActivity : AppCompatActivity() {
     private fun result(hasStand: Boolean = false){
         if (viewModel.inGame.value == false) return
 
+        var hasStandReally = hasStand
+        if (viewModel.getDealerValue() > 21) hasStandReally = true
+
         if (viewModel.getPlayerValue() == 21 && viewModel.getPlayerHand().value?.size == 2 && hasStand){
             if (viewModel.getDealerValue() != 21 && viewModel.getDealerHand().value?.size == 2){
                 viewModel.inGame.value = false
@@ -162,8 +170,15 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        else if (hasStand){
-            if (viewModel.getPlayerValue() < viewModel.getDealerValue()){
+        else if (hasStandReally){
+            if (viewModel.getDealerValue() > 21){
+                viewModel.inGame.value = false
+                viewModel.bank.value = viewModel.bank.value?.plus(viewModel.bet.value!!)
+                viewModel.bank.value?.let { bank -> BankDialog.newInstance("You've won, dealer is over 21", bank).show(supportFragmentManager, "bankDialog") }
+                return
+            }
+
+            else if (viewModel.getPlayerValue() < viewModel.getDealerValue()){
                 viewModel.inGame.value = false
                 viewModel.bank.value = viewModel.bank.value?.minus(viewModel.bet.value!!)
                 viewModel.bank.value?.let { bank -> BankDialog.newInstance("You've lost, dealer is over you", bank).show(supportFragmentManager, "bankDialog") }
@@ -176,13 +191,6 @@ class MainActivity : AppCompatActivity() {
                 return
             }
         }
-
-        else if (viewModel.getDealerValue() > 21){
-            viewModel.inGame.value = false
-            viewModel.bank.value = viewModel.bank.value?.plus(viewModel.bet.value!!)
-            viewModel.bank.value?.let { bank -> BankDialog.newInstance("You've won, dealer is over 21", bank).show(supportFragmentManager, "bankDialog") }
-            return
-        }
     }
 
     private fun stand(deck: Deck){
@@ -190,17 +198,23 @@ class MainActivity : AppCompatActivity() {
         updateDealerCount()
 
         if (viewModel.getDealerValue() < 17 || viewModel.getDealerValue() < viewModel.getPlayerValue()) {
-            viewModel.drawCard(deck.deckId).observe(this){ card ->
-                viewModel.addDealerCard(card)
-                updateDealerHand()
-                updateDealerCount()
-
-                if (viewModel.getDealerValue() < 17 || viewModel.getDealerValue() < viewModel.getPlayerValue()) {
-                    stand(deck)
-                }
-            }
+            handleStand(deck)
         } else {
+            updateDealerHand()
+            updateDealerCount()
             result(true)
+        }
+    }
+
+    private fun handleStand(deck: Deck){
+        viewModel.drawCard(deck.deckId).observe(this){ card ->
+            viewModel.addDealerCard(card)
+            updateDealerHand()
+            updateDealerCount()
+
+            if (viewModel.getDealerValue() < 17 || viewModel.getDealerValue() < viewModel.getPlayerValue()) {
+                handleStand(deck)
+            }
         }
     }
 
