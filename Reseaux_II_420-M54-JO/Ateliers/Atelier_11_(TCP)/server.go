@@ -36,11 +36,16 @@ func manage(conn *net.TCPConn) {
 	binary.Write(conn, binary.BigEndian, TYPE_STRING)
 
 	//Le message
-	var payload = []byte("Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum \n Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum \n Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum")
+	var payload = "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum \n Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum \n Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum"
 
-	//Envoie la taille du message
-	binary.Write(conn, binary.BigEndian, uint32(len(payload)))
-
-	//Envoie le message
-	conn.Write(payload)
+	//send payload in parts of 32 bytes
+	var i uint32
+	for i = 0; i < uint32(len(payload)); i += 32 {
+		var end = i + 32
+		if end > uint32(len(payload)) {
+			end = uint32(len(payload))
+		}
+		binary.Write(conn, binary.BigEndian, end-i)
+		conn.Write([]byte(payload[i:end]))
+	}
 }
