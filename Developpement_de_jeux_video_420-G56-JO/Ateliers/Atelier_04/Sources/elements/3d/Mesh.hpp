@@ -16,9 +16,9 @@ class Mesh {
 private:
     double *vertices;           ///< Sommets
     double *texCoords;          ///< Coordonnées de texture
+    double *normals;            ///< Normales
     size_t vertexCount;         ///< Nombre de sommets.
     unsigned int textureId;     ///< Identifiant de la texture.
-    double *normals;            ///< Normales
 
 public:
     /// @brief Classe représentant un maillage.
@@ -36,29 +36,25 @@ public:
             vector<double> vn;
             vector<int> f;
 
+            double x, y, z;
+
             string read;
 
-            while(!file.eof()){
+            while(file.tellg() != -1){
                 file >> read;
 
-                if (read == "#" || read == "o" || read == "g" || read == "s") {
-                    file.ignore(256, 10);
-                }
-                else if (read == "v"){
-                    double x, y, z;
+                if (read == "v"){
                     file >> x >> y >> z;
                     v.push_back(x);
                     v.push_back(y);
                     v.push_back(z);
                 }
                 else if (read == "vt"){
-                    double x, y;
                     file >> x >> y;
                     vt.push_back(x);
                     vt.push_back(y);
                 }
                 else if (read == "vn"){
-                    double x, y, z;
                     file >> x >> y >> z;
                     vn.push_back(x);
                     vn.push_back(y);
@@ -66,12 +62,16 @@ public:
                 }
                 else if (read == "f"){
                     for (int i = 0; i < 3; i++){
-                        int x, y, z;
-                        file >> x >> read >> y >> read >> z;
-                        f.push_back(x);
-                        f.push_back(y);
-                        f.push_back(z);
+                        file >> read;
+                        f.push_back(stoi(read.substr(0, read.find("/"))));
+                        read = read.substr(read.find("/") + 1);
+                        f.push_back(stoi(read.substr(0, read.find("/"))));
+                        read = read.substr(read.find("/") + 1);
+                        f.push_back(stoi(read.substr(0, read.find("/"))));
                     }
+                }
+                else {
+                    file.ignore(256, 10);
                 }
             }
             
@@ -95,35 +95,6 @@ public:
 
             file.close();
         }
-
-        /*
-        vertexCount = 24;
-
-        vertices = new double[72] { 
-            -0.5, -0.5, -0.5,  0.5, -0.5, -0.5,  0.5,  0.5, -0.5, -0.5,  0.5, -0.5, 
-            -0.5, -0.5,  0.5,  0.5, -0.5,  0.5,  0.5,  0.5,  0.5, -0.5,  0.5,  0.5, 
-            -0.5, -0.5,  0.5, -0.5, -0.5, -0.5,  0.5, -0.5, -0.5,  0.5, -0.5,  0.5, 
-            -0.5,  0.5,  0.5, -0.5,  0.5, -0.5,  0.5,  0.5, -0.5,  0.5,  0.5,  0.5, 
-            -0.5,  0.5,  0.5, -0.5,  0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,  0.5, 
-             0.5,  0.5,  0.5,  0.5,  0.5, -0.5,  0.5, -0.5, -0.5,  0.5, -0.5,  0.5};
-        
-        texCoords = new double[48] {  
-            0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-            0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-            0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-            0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-            0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-            0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0  };
-
-        normals = new double[72] {  
-             0.0,  0.0, -1.0,  0.0,  0.0, -1.0,  0.0,  0.0, -1.0,  0.0,  0.0, -1.0,    //Back
-             0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,    //Front
-             0.0, -1.0,  0.0,  0.0, -1.0,  0.0,  0.0, -1.0,  0.0,  0.0, -1.0,  0.0,    //Bottom
-             0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,    //Top
-            -1.0,  0.0,  0.0, -1.0,  0.0,  0.0, -1.0,  0.0,  0.0, -1.0,  0.0,  0.0,    //Left
-             1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0,  1.0,  0.0,  0.0 };  //Right
-
-             */
     }
 
     /// @brief Destructeur du maillage.
@@ -204,6 +175,6 @@ public:
         glVertexPointer(3, GL_DOUBLE, 0, vertices);
         glTexCoordPointer(2, GL_DOUBLE, 0, texCoords);
         glNormalPointer(GL_DOUBLE, 0, normals);
-        glDrawArrays(GL_QUADS, 0, vertexCount);
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     }
 };

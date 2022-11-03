@@ -38,30 +38,30 @@ public:
         /// TODO: Ajout des resources nécessaires.
         ResourcesManager::addResource("Crate", new Texture("crate.png"));
 
-        mesh = new Mesh("cube.obj", "Crate");
-/*
-        mesh->translate({-5.0, 0.0, -5.0});
+        mesh = new Mesh("../Assets/Meshes/crate.obj", "Crate");
+
+       // mesh->translate({-5.0, 0.0, -5.0});
         rotation.loadYRotation(0.001);
-        rotation.e14 = -5.0;
-        rotation.e24 = 0.0;
-        rotation.e34 = -5.0;
+        //rotation.e14 = -5.0;
+        //rotation.e24 = 0.0;
+        //rotation.e34 = -5.0;
         rotX = rotY = rotZ = 0.0;
 
         rotationX.loadXRotation(0.0003);
-        rotationX.e14 = -5.0;
-        rotationX.e24 = 0.0;
-        rotationX.e34 = -5.0;
+       // rotationX.e14 = -5.0;
+       // rotationX.e24 = 0.0;
+       // rotationX.e34 = -5.0;
 
         rotationY.loadYRotation(0.0005);
-        rotationY.e14 = -5.0;
-        rotationY.e24 = 0.0;
-        rotationY.e34 = -5.0;
+      //  rotationY.e14 = -5.0;
+      //  rotationY.e24 = 0.0;
+      //  rotationY.e34 = -5.0;
 
         rotationZ.loadZRotation(0.0007);
-        rotationZ.e14 = -5.0;
-        rotationZ.e24 = 0.0;
-        rotationZ.e34 = -5.0;
-*/
+       // rotationZ.e14 = -5.0;
+       // rotationZ.e24 = 0.0;
+       // rotationZ.e34 = -5.0;
+
     }
 
     /// @brief Déchargement de la scène.
@@ -77,9 +77,9 @@ public:
     /// @brief Mise à jour de la scène.
     /// @param deltaTime Secondes écoulées depuis le dernier rafraîchissement.
     void handleUpdate(const double &deltaTime) {
-       /* mesh->localTransform(rotationX);
+        mesh->localTransform(rotationX);
         mesh->localTransform(rotationY);
-        mesh->globalTransform(rotationZ);*/
+        mesh->localTransform(rotationZ);
     }
 
     /// @brief Affichage de la scène.
