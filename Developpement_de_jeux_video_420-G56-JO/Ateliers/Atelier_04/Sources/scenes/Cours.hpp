@@ -6,7 +6,7 @@
 
 #include "Scene.hpp"
 #include "../Matrix44d.hpp"
-#include "../Mesh.hpp"
+#include "../elements/3d/Mesh.hpp"
 
 /// @class Test
 /// @brief Scène de cours.
@@ -17,8 +17,7 @@ private:
     Matrix44d perspective;   ///< Matrice de projection perspective.
     Matrix44d rotation;      ///< Matrice de rotation.
     Mesh *mesh;              ///< Maillage.
-
-    double *vertex, *texCoords;
+    Matrix44d rotationX, rotationY, rotationZ;  ///< Matrices de rotation.
 
 public:
     /// @brief Chargement de la scène.
@@ -29,6 +28,9 @@ public:
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
 
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+
         /// TODO: Chargement des matrices de projection nécessaires.
         orthographic.loadOrthographic(size.x, size.y);
         perspective.loadPerspective(85.0, 1.0, 10.0, (double)size.y / (double)size.x);
@@ -36,22 +38,8 @@ public:
         /// TODO: Ajout des resources nécessaires.
         ResourcesManager::addResource("Crate", new Texture("crate.png"));
 
-        vertex = new double[72] { -0.5, -0.5, -0.5,  0.5, -0.5, -0.5,  0.5,  0.5, -0.5, -0.5,  0.5, -0.5,
-                                  -0.5, -0.5,  0.5,  0.5, -0.5,  0.5,  0.5,  0.5,  0.5, -0.5,  0.5,  0.5,
-                                  -0.5, -0.5, -0.5, -0.5,  0.5, -0.5, -0.5,  0.5,  0.5, -0.5, -0.5,  0.5,
-                                   0.5, -0.5, -0.5,  0.5,  0.5, -0.5,  0.5,  0.5,  0.5,  0.5, -0.5,  0.5,
-                                  -0.5, -0.5, -0.5, -0.5, -0.5,  0.5,  0.5, -0.5,  0.5,  0.5, -0.5, -0.5,
-                                  -0.5,  0.5, -0.5, -0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5, -0.5};
-
-
-        texCoords = new double[48] {  0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-                                      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-                                      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-                                      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-                                      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-                                      0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0  };
-
-        mesh = new Mesh(vertex, texCoords, 24);
+        mesh = new Mesh("cube.obj", "Crate");
+/*
         mesh->translate({-5.0, 0.0, -5.0});
         rotation.loadYRotation(0.001);
         rotation.e14 = -5.0;
@@ -59,6 +47,21 @@ public:
         rotation.e34 = -5.0;
         rotX = rotY = rotZ = 0.0;
 
+        rotationX.loadXRotation(0.0003);
+        rotationX.e14 = -5.0;
+        rotationX.e24 = 0.0;
+        rotationX.e34 = -5.0;
+
+        rotationY.loadYRotation(0.0005);
+        rotationY.e14 = -5.0;
+        rotationY.e24 = 0.0;
+        rotationY.e34 = -5.0;
+
+        rotationZ.loadZRotation(0.0007);
+        rotationZ.e14 = -5.0;
+        rotationZ.e24 = 0.0;
+        rotationZ.e34 = -5.0;
+*/
     }
 
     /// @brief Déchargement de la scène.
@@ -74,15 +77,9 @@ public:
     /// @brief Mise à jour de la scène.
     /// @param deltaTime Secondes écoulées depuis le dernier rafraîchissement.
     void handleUpdate(const double &deltaTime) {
-        /*
-        rotX += 3.0 * deltaTime;
-        rotY += 5.0 * deltaTime;
-        rotZ += 7.0 * deltaTime;
-        */
-
-        //mesh->translate({0.0, 0.0, -0.0011});
-        //mesh->translate({0.01, 0.0, 0.0});
-        mesh->localTransform(rotation);
+       /* mesh->localTransform(rotationX);
+        mesh->localTransform(rotationY);
+        mesh->globalTransform(rotationZ);*/
     }
 
     /// @brief Affichage de la scène.
