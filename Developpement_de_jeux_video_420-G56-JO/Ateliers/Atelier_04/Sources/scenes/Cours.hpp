@@ -38,29 +38,29 @@ public:
         /// TODO: Ajout des resources nécessaires.
         ResourcesManager::addResource("Crate", new Texture("crate.png"));
 
-        mesh = new Mesh("../Assets/Meshes/crate.obj", "Crate");
+        mesh = new Mesh("../Assets/Meshes/cube.obj", "Crate");
 
-       // mesh->translate({-5.0, 0.0, -5.0});
+        mesh->translate({-5.0, 0.0, -5.0});
         rotation.loadYRotation(0.001);
-        //rotation.e14 = -5.0;
-        //rotation.e24 = 0.0;
-        //rotation.e34 = -5.0;
+        rotation.e14 = -5.0;
+        rotation.e24 = 0.0;
+        rotation.e34 = -5.0;
         rotX = rotY = rotZ = 0.0;
 
         rotationX.loadXRotation(0.0003);
-       // rotationX.e14 = -5.0;
-       // rotationX.e24 = 0.0;
-       // rotationX.e34 = -5.0;
+        rotationX.e14 = -5.0;
+        rotationX.e24 = 0.0;
+        rotationX.e34 = -5.0;
 
         rotationY.loadYRotation(0.0005);
-      //  rotationY.e14 = -5.0;
-      //  rotationY.e24 = 0.0;
-      //  rotationY.e34 = -5.0;
+        rotationY.e14 = -5.0;
+        rotationY.e24 = 0.0;
+        rotationY.e34 = -5.0;
 
         rotationZ.loadZRotation(0.0007);
-       // rotationZ.e14 = -5.0;
-       // rotationZ.e24 = 0.0;
-       // rotationZ.e34 = -5.0;
+        rotationZ.e14 = -5.0;
+        rotationZ.e24 = 0.0;
+        rotationZ.e34 = -5.0;
 
     }
 
@@ -91,7 +91,7 @@ public:
         
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glTranslated(0.0, 0.0, -3.0);
+        glTranslated(0.0, 0.0, -3.5);
         glRotated(rotX, 1.0, 0.0, 0.0);
         glRotated(rotY, 0.0, 1.0, 0.0);
         glRotated(rotZ, 0.0, 0.0, 1.0);

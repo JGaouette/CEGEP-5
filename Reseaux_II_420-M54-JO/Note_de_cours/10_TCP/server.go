@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 )
 
 const (
@@ -23,10 +25,23 @@ func main() {
 		server.Close()
 	}()
 
+	//Gérer le ctrl+c
+	go func(l *net.TCPListener) {
+		sigchan := make(chan os.Signal)
+		signal.Notify(sigchan, os.Interrupt)
+		<-sigchan
+		l.Close()
+		os.Exit(0)
+	}(server)
+
 	fmt.Println("Serveur démarré sur le port 8000")
 
 	for {
-		conn, _ := server.AcceptTCP()
+		conn, err := server.AcceptTCP()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 		go manage(conn)
 	}
 }

@@ -126,9 +126,9 @@ public:
             double y = vertices[i + 1];
             double z = vertices[i + 2];
 
-            vertices[i] = matrix.e11 * x + matrix.e21 * y + matrix.e31 * z;
-            vertices[i + 1] = matrix.e12 * x + matrix.e22 * y + matrix.e32 * z;
-            vertices[i + 2] = matrix.e13 * x + matrix.e23 * y + matrix.e33 * z;
+            vertices[i] = matrix.e11 * x + matrix.e21 * y + matrix.e31 * z + matrix.e14;
+            vertices[i + 1] = matrix.e12 * x + matrix.e22 * y + matrix.e32 * z + matrix.e24;
+            vertices[i + 2] = matrix.e13 * x + matrix.e23 * y + matrix.e33 * z + matrix.e34;
             
             x = normals[i];
             y = normals[i + 1];
@@ -137,11 +137,6 @@ public:
             normals[i] = matrix.e11 * x + matrix.e21 * y + matrix.e31 * z;
             normals[i + 1] = matrix.e12 * x + matrix.e22 * y + matrix.e32 * z;
             normals[i + 2] = matrix.e13 * x + matrix.e23 * y + matrix.e33 * z;
-
-
-            vertices[i] += matrix.e14;
-            vertices[i + 1] += matrix.e24;
-            vertices[i + 2] += matrix.e34;
         }
     }
 
@@ -176,5 +171,8 @@ public:
         glTexCoordPointer(2, GL_DOUBLE, 0, texCoords);
         glNormalPointer(GL_DOUBLE, 0, normals);
         glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
     }
 };
