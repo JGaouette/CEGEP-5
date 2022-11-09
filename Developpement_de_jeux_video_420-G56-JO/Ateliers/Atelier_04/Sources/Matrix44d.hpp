@@ -60,6 +60,14 @@ struct Matrix44d {
         e34 = -1.0;
     }
 
+    void loadView(const Vector3d& front, const Vector3d& side, const Vector3d& up){
+        e11 = side.x; e12 = up.x; e13 = -front.x;
+        e21 = side.y; e22 = up.y; e23 = -front.y;
+        e31 = side.z; e32 = up.z; e33 = -front.z;
+        e14 = e24 = e34 = e41 = e42 = e43 = 0.0;
+        e44 = 1.0;
+    }
+
     /// @brief Transposer la matrice
     void transpose(){
         double tmp;

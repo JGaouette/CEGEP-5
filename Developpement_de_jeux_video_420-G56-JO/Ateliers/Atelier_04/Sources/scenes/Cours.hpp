@@ -7,6 +7,7 @@
 #include "Scene.hpp"
 #include "../Matrix44d.hpp"
 #include "../elements/3d/Mesh.hpp"
+#include "../elements/3d/Camera.hpp"
 
 /// @class Test
 /// @brief Scène de cours.
@@ -18,6 +19,7 @@ private:
     Matrix44d rotation;      ///< Matrice de rotation.
     Mesh *mesh;              ///< Maillage.
     Matrix44d rotationX, rotationY, rotationZ;  ///< Matrices de rotation.
+    Camera camera;           ///< Caméra.
 
 public:
     /// @brief Chargement de la scène.
@@ -35,33 +37,35 @@ public:
         orthographic.loadOrthographic(size.x, size.y);
         perspective.loadPerspective(85.0, 1.0, 10.0, (double)size.y / (double)size.x);
 
+        camera.setView({-3.0, 2.0, 3.0}, {0.0, 0.0, 0.0}, {0.0, 1.0, 0.0});
+
         /// TODO: Ajout des resources nécessaires.
         ResourcesManager::addResource("Crate", new Texture("crate.png"));
 
-        mesh = new Mesh("../Assets/Meshes/cube.obj", "Crate");
+        mesh = new Mesh("../Assets/Meshes/crate.obj", "Crate");
 
-        mesh->translate({-5.0, 0.0, -5.0});
-        rotation.loadYRotation(0.001);
+        //mesh->translate({-5.0, 0.0, -5.0});
+        /*
         rotation.e14 = -5.0;
         rotation.e24 = 0.0;
         rotation.e34 = -5.0;
-        rotX = rotY = rotZ = 0.0;
+        rotX = rotY = rotZ = 0.0;*/
 
-        rotationX.loadXRotation(0.0003);
+        rotationX.loadXRotation(0.0003);/*
         rotationX.e14 = -5.0;
         rotationX.e24 = 0.0;
-        rotationX.e34 = -5.0;
+        rotationX.e34 = -5.0;*/
 
-        rotationY.loadYRotation(0.0005);
+        rotationY.loadYRotation(0.0005);/*
         rotationY.e14 = -5.0;
         rotationY.e24 = 0.0;
-        rotationY.e34 = -5.0;
+        rotationY.e34 = -5.0;*/
 
-        rotationZ.loadZRotation(0.0007);
+        rotationZ.loadZRotation(0.0007);/*
         rotationZ.e14 = -5.0;
         rotationZ.e24 = 0.0;
         rotationZ.e34 = -5.0;
-
+*/
     }
 
     /// @brief Déchargement de la scène.
@@ -91,11 +95,13 @@ public:
         
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+        camera.applyView();
+        /*
         glTranslated(0.0, 0.0, -3.5);
         glRotated(rotX, 1.0, 0.0, 0.0);
         glRotated(rotY, 0.0, 1.0, 0.0);
         glRotated(rotZ, 0.0, 0.0, 1.0);
-
+        */
         mesh->draw();
     }
 };
