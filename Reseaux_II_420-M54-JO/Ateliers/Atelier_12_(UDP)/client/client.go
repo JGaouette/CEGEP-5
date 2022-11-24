@@ -9,15 +9,18 @@ import (
 
 func main() {
 	udpServer, err := net.ResolveUDPAddr("udp", ":8000")
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	conn, _ := net.DialUDP("udp", nil, udpServer)
+
 	defer func() {
 		fmt.Println("Fermeture du serveur")
 		conn.Close()
 	}()
 	conn.Write([]byte("Client request connection"))
+
 	for {
 		buf := make([]byte, 1024)
 		n, _, _ := conn.ReadFromUDP(buf)

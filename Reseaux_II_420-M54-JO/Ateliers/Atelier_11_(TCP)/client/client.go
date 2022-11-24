@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 	c "utils/const"
 )
 
@@ -36,8 +37,10 @@ func main() {
 			break
 
 		case c.TYPE_INT:
-			binary.Read(conn, binary.BigEndian, &v)
-			fmt.Println("integer:", v)
+			v = make([]byte, l)
+			conn.Read(v)
+			nb, _ := strconv.Atoi(string(v))
+			fmt.Println("integer:", nb)
 			break
 		}
 	}

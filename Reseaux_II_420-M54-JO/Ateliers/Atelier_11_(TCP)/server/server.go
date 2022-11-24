@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"strconv"
 	c "utils/const"
 )
 
@@ -17,6 +20,15 @@ func main() {
 		fmt.Println("Fermeture du serveur")
 		server.Close()
 	}()
+
+	//Gérer le ctrl+c
+	go func(l *net.TCPListener) {
+		sigchan := make(chan os.Signal)
+		signal.Notify(sigchan, os.Interrupt)
+		<-sigchan
+		l.Close()
+		os.Exit(0)
+	}(server)
 
 	fmt.Println("Serveur démarré sur le port 8000")
 
@@ -71,8 +83,9 @@ func manage(conn *net.TCPConn) {
 	binary.Write(conn, binary.BigEndian, c.TYPE_INT)
 
 	//Envoie la taille du message
-	binary.Write(conn, binary.BigEndian, 4)
+	var l uint32 = 4
+	binary.Write(conn, binary.BigEndian, l)
 
 	//Envoie le message
-	binary.Write(conn, binary.BigEndian, payload3)
+	binary.Write(conn, binary.BigEndian, []byte(strconv.Itoa(payload3)))
 }
