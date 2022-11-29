@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	cert, err := tls.LoadX509KeyPair("localhost/cert.pem", "localhost/key.pem")
+	cert, err := tls.LoadX509KeyPair("../localhost/cert.pem", "../localhost/key.pem")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -24,7 +24,7 @@ func main() {
 		conn, _ := server.Accept()
 		go func(conn net.Conn) {
 			for {
-				io.WriteString(conn, "Hello from server\n")
+				io.WriteString(conn, "Hello from TCP\n")
 				time.Sleep(time.Second)
 			}
 		}(conn)
