@@ -1,5 +1,13 @@
 package main
 
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+)
+
 type DogFact struct {
 	Facts   []string `json:"facts"`
 	Success bool     `json:"success"`
@@ -8,7 +16,7 @@ type DogFact struct {
 func main() {
 
 	// Site génial d'API : https://github.com/public-apis/public-apis
-	/* Permet de lire un API (exemple dog)
+	// Permet de lire un API (exemple dog)
 	var webSiteURL = "http://dog-api.kinduff.com/api/facts"
 	u, _ := url.Parse(webSiteURL)
 
@@ -30,7 +38,7 @@ func main() {
 	json.Unmarshal(responseBytes, &dogFact)
 
 	fmt.Println(dogFact)
-	*/
+
 	/*
 		var webSiteURL2 = "https://api.waifu.pics/sfw/neko"
 		u2, _ := url.Parse(webSiteURL2)
